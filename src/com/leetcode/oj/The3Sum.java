@@ -31,8 +31,6 @@ public class The3Sum {
     }
     
     private int binary(int[] nums, int left, int right, int target) {
-//    	if (nums[left] > target || nums[right] < target)
-//            return -1;
         if (left > right)
             return -1;
         int mid = (left + right)/2;
