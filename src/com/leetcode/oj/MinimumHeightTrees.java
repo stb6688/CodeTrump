@@ -1,6 +1,7 @@
 package com.leetcode.oj;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -11,38 +12,24 @@ import java.util.Set;
 import com.leetcode.util.ArrayUtil;
 
 public class MinimumHeightTrees {
+	
+	private int minH = Integer.MAX_VALUE;
 	public List<Integer> findMinHeightTrees(int n, int[][] edges) {
-        List<Integer> results = new ArrayList<>();
-        Set<Integer> nodes = new HashSet<>();
+        if (n == 0)
+            return Collections.emptyList();
         Map<Integer, List<Integer>> nodeNeighbors = new HashMap<>();
         for (int[] edge : edges) {
-            addEdge(edge[0], edge[1], nodeNeighbors);
-            addEdge(edge[1], edge[0], nodeNeighbors);
-            nodes.add(edge[0]);
-            nodes.add(edge[1]);
+            int n1 = edge[0], n2 = edge[1];
+            addNeighbor(n1, n2, nodeNeighbors);
+            addNeighbor(n2, n1, nodeNeighbors);
         }
-        int minH = Integer.MAX_VALUE;
-        for (Integer node : nodes) {
-            List<Integer> level = new LinkedList<>();
-            level.add(node);
-            Set<Integer> visited = new HashSet<>();
+                
+        List<Integer> results = new LinkedList<>();
+        for (Integer node : nodeNeighbors.keySet()) {
+            Set<Integer> visited = new HashSet<Integer>();
             visited.add(node);
-            int h = 0;
-            while (!level.isEmpty()) {
-                List<Integer> nextLevel = new LinkedList<>();
-                for (Integer curr : level) {
-                    List<Integer> neighbors = nodeNeighbors.get(curr);
-                    for (Integer neighbor : neighbors) {
-                        if (visited.add(neighbor))
-                            nextLevel.add(neighbor);
-                    }
-                }
-                level = nextLevel;
-                if (++h == minH)
-                    break;
-            }
-            // either finished all levels or hitting minH
-            if (level.isEmpty()) {
+            int h = dfs(node, nodeNeighbors, visited);
+            if (h <= minH) {
                 if (h < minH) {
                     minH = h;
                     results.clear();
@@ -50,18 +37,86 @@ public class MinimumHeightTrees {
                 results.add(node);
             }
         }
-        
         return results;
     }
-	
-	private void addEdge(Integer n1, Integer n2, Map<Integer, List<Integer>> nodeNeighbors) {
+    
+    private void addNeighbor(Integer n1, Integer n2, Map<Integer, List<Integer>> nodeNeighbors) {
         List<Integer> neighbors = nodeNeighbors.get(n1);
         if (neighbors == null) {
-            neighbors = new ArrayList<>();
+            neighbors = new LinkedList<>();
             nodeNeighbors.put(n1, neighbors);
         }
         neighbors.add(n2);
     }
+    
+    private int dfs(Integer node, Map<Integer, List<Integer>> nodeNeighbors, Set<Integer> visited) {
+        int h = Integer.MIN_VALUE;
+        List<Integer> neighbors = nodeNeighbors.get(node);
+        for (Integer neighbor : neighbors) {
+            if (visited.add(neighbor)) {
+                int subH = dfs(neighbor, nodeNeighbors, visited);
+                if (subH + 1 > minH)
+                    return Integer.MAX_VALUE; // greedy
+                else
+                    h = Math.max(h, subH + 1);
+            }
+        }
+        return h;
+    }
+	
+	// Solution I: TLE, correct logic
+	// bfs
+	/*
+	public List<Integer> findMinHeightTrees(int n, int[][] edges) {
+        if (n == 0)
+            return Collections.emptyList();
+        Map<Integer, List<Integer>> nodeNeighbors = new HashMap<>();
+        for (int[] edge : edges) {
+            int n1 = edge[0], n2 = edge[1];
+            addNeighbor(n1, n2, nodeNeighbors);
+            addNeighbor(n2, n1, nodeNeighbors);
+        }
+        int minH = Integer.MAX_VALUE;
+        List<Integer> results = new LinkedList<>();
+        for (Integer node : nodeNeighbors.keySet()) {
+            List<Integer> list = new LinkedList<>();
+            list.add(node);
+            Set<Integer> visited = new HashSet<>();
+            visited.add(node);
+            int h = 0;
+            while (!list.isEmpty()) {
+                List<Integer> nextList = new LinkedList<>();
+                for (Integer e : list) {
+                    // all nodes should have neighbors
+                    List<Integer> neighbors = nodeNeighbors.get(e);
+                    for (Integer neighbor : neighbors) {
+                        if (visited.add(neighbor))
+                            nextList.add(neighbor);
+                    }
+                }
+                list = nextList;
+                h++;
+            }
+            if (h <= minH) {
+                if (h < minH) {
+                    minH = h;
+                    results.clear();
+                }
+                results.add(node);                
+            }
+        }
+        return results;
+    }
+    
+    private void addNeighbor(Integer n1, Integer n2, Map<Integer, List<Integer>> nodeNeighbors) {
+        List<Integer> neighbors = nodeNeighbors.get(n1);
+        if (neighbors == null) {
+            neighbors = new LinkedList<>();
+            nodeNeighbors.put(n1, neighbors);
+        }
+        neighbors.add(n2);
+    }
+    */
 
 	public static void main(String[] args) {
 		MinimumHeightTrees instance = new MinimumHeightTrees();

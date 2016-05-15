@@ -43,6 +43,17 @@ public class ArrayUtil {
 		System.out.print("]");
 		System.out.println();
 	}
+	
+	public static int[] str2intArray(String s) {
+		s = s.trim();
+		// remove square brackets
+		s = s.substring(1, s.length()-1);
+		String[] splits = s.split(",");
+		int[] results = new int[splits.length];
+		for (int i = 0; i < splits.length; i++)
+			results[i] = Integer.valueOf(splits[i].trim());
+		return results;
+	}
 
 	public static int[][] str2int2DArray(String s) {
 		s = s.substring(1, s.length()-1);
@@ -62,9 +73,17 @@ public class ArrayUtil {
 			String[] elements = split.split(",");
 			int[] row = new int[elements.length];
 			for (int i = 0; i < elements.length; i++) {
-				row[i] = Integer.valueOf(elements[i]);
+				row[i] = Integer.valueOf(elements[i].trim());
 			}
 			results[r++] = row;
+		}
+		return results;
+	}
+	
+	public static char[][] strArrayTo2DCharArray(String[] sArray) {
+		char[][] results = new char[sArray.length][];
+		for (int i = 0; i < sArray.length; i++) {
+			results[i] = sArray[i].toCharArray();
 		}
 		return results;
 	}

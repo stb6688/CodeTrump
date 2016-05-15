@@ -1,10 +1,42 @@
 package com.leetcode.oj;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
 public class ReverseVowelsOfAString {
 	
+	private static final Set<Character> vowels = new HashSet<>();
+    static {
+        vowels.add('a');
+        vowels.add('e');
+        vowels.add('i');
+        vowels.add('o');
+        vowels.add('u');
+        vowels.add('A');
+        vowels.add('E');
+        vowels.add('I');
+        vowels.add('O');
+        vowels.add('U');
+    }
+    public String reverseVowels(String s) {
+        char[] chars = s.toCharArray();
+        int l = 0, r = s.length() - 1;
+        while (l < r) {
+            while (l < r && !vowels.contains(chars[l])) l++;
+            while (l < r && !vowels.contains(chars[r])) r--;
+            if (l < r) {
+                chars[l] = (char)(chars[l] ^ chars[r]);
+                chars[r] = (char)(chars[l] ^ chars[r]);
+                chars[l] = (char)(chars[l] ^ chars[r]);
+                l++;
+                r--;
+            }
+        }
+        return new String(chars);
+    }
+	
+	/*
 	private static final Set<Character> vowels = new HashSet<>();
     static {
         vowels.add('a');
@@ -41,6 +73,7 @@ public class ReverseVowelsOfAString {
         chars[j] = (char)(chars[i] ^ chars[j]);
         chars[i] = (char)(chars[i] ^ chars[j]);
     }
+    */
     
     public static void main(String[] args) {
     	ReverseVowelsOfAString instance = new ReverseVowelsOfAString();
