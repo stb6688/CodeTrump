@@ -5,43 +5,41 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Stack;
 
 import com.leetcode.util.TreeNode;
 
-public class BinaryTreePostorderTraversal {
+public abstract class BinaryTreePostorderTraversal {
 
-	public List<Integer> postorderTraversal(TreeNode root) {
-        // edge case
-        if (root == null)
-            return Collections.emptyList();
-            
-        List<Integer> results = new ArrayList<Integer>();
-        Deque<TreeNode> queue = new LinkedList<TreeNode>();
-        TreeNode newNode = root;
-        do {
-            while (newNode != null) {
-                queue.addLast(newNode);
-                newNode = newNode.left;
-            }
-            TreeNode node = queue.pollLast();
-            results.add(node.val);
-            if (node.right != null)
-                newNode = node.right;
-            else
-                newNode = null;
-        } while (!queue.isEmpty());
-        
-        return results;
-    }
+	public abstract List<Integer> postorderTraversal(TreeNode root);
 	
 	public static void main(String[] args) {
-		BinaryTreePostorderTraversal instance = new BinaryTreePostorderTraversal();
+		BinaryTreePostorderTraversal instance = new Solution();
+		TreeNode root;
+		List<Integer> results;
 		
-		TreeNode root = new TreeNode(1);
-		TreeNode right = new TreeNode(2);
-		root.right = right;
-		
-		System.out.println(">>>Result: " + instance.postorderTraversal(root));
+		root = TreeNode.deserialize("[3,null,1,2]");
+		results = instance.postorderTraversal(root);
+		System.out.println("results=" + results);
+	}
+	
+	public static class Solution extends BinaryTreePostorderTraversal {
+		public List<Integer> postorderTraversal(TreeNode root) {
+	        List<Integer> results = new ArrayList<>();
+	        TreeNode node = root;
+	        Stack<TreeNode> nodes = new Stack<>();
+	        while (node != null || !nodes.isEmpty()) {
+	            while (node != null) {
+	                results.add(node.val);
+	                nodes.push(node);
+	                node = node.right;
+	            }
+	            while (!nodes.isEmpty() && (node = nodes.pop().left) == null);
+	        }
+System.out.println(results);
+	        Collections.reverse(results);
+	        return results;
+	    }
 	}
 	
 }

@@ -1,10 +1,14 @@
 package com.leetcode.oj;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.PriorityQueue;
 
 public class SlidingWindowMaximum {
+	
 	public int[] maxSlidingWindow(int[] nums, int k) {
         if (nums.length == 0)
             return new int[0];

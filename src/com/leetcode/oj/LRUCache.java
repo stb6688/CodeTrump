@@ -3,72 +3,81 @@ package com.leetcode.oj;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.leetcode.util.annotations.Leetcode;
+import com.leetcode.util.annotations.Leetcode.Tags;
+
+@Leetcode(date = "2016-05-26", tags={Tags.LIST}, url="https://leetcode.com/problems/lru-cache/")
 public class LRUCache {
 	
-	static class DNode {
-        int key;
-        int value;
-        DNode prev;
-        DNode next;
-        DNode(int key, int value) {
-            this.key = key;
-            this.value = value;
-        }
-        // insert curr node in front
-        // of node
-        void insert(DNode node) {
-            DNode prev = node.prev;
-            prev.next = this;
-            this.prev = prev;
-            this.next = node;
-            node.prev = this;
+	// an customized doubly linked list, internal class
+    static class DNode {
+        int val;
+        DNode prev, next;
+        
+        DNode(int val) {
+            this.val = val;
         }
         
-        DNode delete() {
-            DNode prev = this.prev;
-            DNode next = this.next;
-            prev.next = next;
-            next.prev = prev;
-            return this;
+        // append a node after me
+        void append(DNode node) {
+            node.next = this.next;
+            this.next.prev = node;
+            node.prev = this;
+            this.next = node;
+        }
+        
+        // remove me from the list
+        void remove() {
+            this.prev.next = this.next;
+            this.next.prev = this.prev;
         }
     }
     
-    private Map<Integer, DNode> keyNode = new HashMap<Integer, DNode>();
-    private DNode dummy = new DNode(-1, -1);
-    private int capacity;
+    // bump given node from current location to head of list
+    private void bump(DNode node) {
+        node.remove();
+        dummy.append(node);
+    }
     
+    private int capacity;
+    private Map<Integer, Integer> keyVal;
+    private Map<Integer, DNode> keyNode;
+    private DNode dummy;
     public LRUCache(int capacity) {
         this.capacity = capacity;
+        keyVal = new HashMap<>();
+        keyNode = new HashMap<>();
+        // CATCH: don't forget to initialize prev/next
+        dummy = new DNode(0);
         dummy.next = dummy;
         dummy.prev = dummy;
     }
     
     public int get(int key) {
-        DNode node = keyNode.get(key);
-        if (node == null)
+        Integer val = keyVal.get(key);
+        if (val == null) {
             return -1;
-        node.delete().insert(dummy.next);
-        return node.value;
+        } else {
+            // keyVal no change;
+            // node no change, but moved to head of list
+            bump(keyNode.get(key));
+            return val;
+        }
     }
     
     public void set(int key, int value) {
-        DNode node = keyNode.get(key);
-        if (node == null) {
-            // new node in list, new entry in 2 maps
-            node = new DNode(key, value);
-            node.insert(dummy.next);
+        if (keyVal.put(key, value) == null) { // newly inserted, should check capacity
+            DNode node = new DNode(key);
             keyNode.put(key, node);
-            // if over-capacity, delete last on list (oldest)
-            if (keyNode.size() > capacity) {
-                DNode last = dummy.prev;
-                last.delete();
-                keyNode.remove(last.key);
+            dummy.append(node);
+            // check capacity, remove last key if necessary
+            if (keyVal.size() > capacity) {
+                Integer lastKey = dummy.prev.val;
+                keyVal.remove(lastKey); // remove key-val
+                keyNode.remove(lastKey).remove(); // remove key-node & remove node from list
             }
-        } else {
-            // promote this node to head of list
-            node.delete().insert(dummy.next);
-            // update value
-            node.value = value;
+        } else { // re-visit an existing key: promote old node to head of list
+            bump(keyNode.get(key));
         }
     }
 	
@@ -123,10 +132,10 @@ public class LRUCache {
 		LRUCache instance = new LRUCache(1);
 		
 		instance.set(2,1);
-		instance.get(2);
+		System.out.println(instance.get(2));
 		instance.set(3,2);
-		instance.get(2);
-		instance.get(3);
+		System.out.println(instance.get(2));
+		System.out.println(instance.get(3));
 		
 		
 	}

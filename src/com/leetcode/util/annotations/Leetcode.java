@@ -8,7 +8,12 @@ public @interface Leetcode {
 		LIST,
 		MATH,
 		RECURSION,
+		RECURSION_VS_ITERATION,
+		DP,
+		MEMOIZATION,
 		TREE,
+		BFS,
+		DFS,
 		TRIE,
 	};
 	

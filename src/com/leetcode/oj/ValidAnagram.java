@@ -2,10 +2,11 @@ package com.leetcode.oj;
 
 import com.leetcode.util.annotations.Leetcode;
 
-@Leetcode(date="2016/05/04")
+@Leetcode(date="2016/05/04", url="https://leetcode.com/problemset/algorithms/")
 public class ValidAnagram {
 	
 	// Solution III: Best
+	// instead of map, use an array with 26 integers as the most efficient way to store counts.
     public boolean isAnagram(String s, String t) {
     	// this is only possible since problems states all chars are lower-case alphabets
         int[] counts = new int[26];

@@ -2,35 +2,39 @@ package com.leetcode.oj;
 
 import java.util.Comparator;
 import java.util.PriorityQueue;
+import java.util.TreeMap;
 
 public class ContainsDuplicateIII {
 	
 	public boolean containsNearbyAlmostDuplicate(int[] nums, int k, int t) {
-        Comparator<Integer> reverseComp = new Comparator<Integer>() {
-            @Override
-            public int compare(Integer i1, Integer i2) {
-                return i2 - i1;
-            }
-        };
-        PriorityQueue<Integer> q1 = new PriorityQueue<>();
-        PriorityQueue<Integer> q2 = new PriorityQueue<>(reverseComp);
+        if (k < 0 || t < 0)
+            return false;
+        TreeMap<Long, Integer> numCount = new TreeMap<>();
+        int size = 0;
         for (int i = 0; i < nums.length; i++) {
+            if (size == k + 1) {
+                Long old = (long)nums[i-1-k];
+                int count = numCount.get(old) - 1;
+                if (count == 0)
+                    numCount.remove(old);
+                else
+                    numCount.put(old, count);
+                size--;
+            }
+            
             int num = nums[i];
-            if (!q1.isEmpty()) {
-System.out.println("num=" + num + ", min=" + q1.peek() + ", max=" + q2.peek());
-                if (Math.abs(num - q1.peek()) <= t || Math.abs(num - q2.peek()) <= t)
-                    return true;
-            }
-            q1.add(num);
-            q2.add(num);
-            if (q1.size() > k) {
-                q1.remove(nums[i - k]);
-                q2.remove(nums[i - k]);
-            }
+            if (!numCount.subMap((long)num-t, true, (long)num+t, true).isEmpty())
+                return true;
+            
+            Integer count = numCount.get((long)num);
+            if (count == null)
+                count = 0;
+            numCount.put((long)num, count + 1);
+            size++;
         }
-        
         return false;
     }
+	
 	
 	// Solution I: TLE
 	/*

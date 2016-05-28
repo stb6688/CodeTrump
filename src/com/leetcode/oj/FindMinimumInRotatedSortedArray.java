@@ -2,6 +2,28 @@ package com.leetcode.oj;
 
 public class FindMinimumInRotatedSortedArray {
 	
+	
+	public int findMinX(int[] nums) {
+        // edge case if only 1 element or if cut at 0 which doesn't change array
+        if (nums[0] <= nums[nums.length-1])
+            return nums[0];
+        int i = 0, j = nums.length - 1;
+        while (i <= j) {
+            int m = i + (j-i)/2;
+System.out.println("i = " + i + ", j=" + j + ", m=" + m);
+            // Error: forget i==j; forget nums[m-1] == nums[i]
+            if (nums[m] <= nums[i] && m-1 >= 0 && nums[m-1] >= nums[i])
+                return nums[m];
+            else if (nums[m] < nums[i])
+                j = m - 1;
+            else
+                i = m + 1;
+        }
+        return -1; // unrechable
+    }
+	
+	
+	
 	/// Solution I (Passed): improved O(logn) solution. ///
     /**
      * Keep dividing into an subarray where left > right,
@@ -95,6 +117,18 @@ public class FindMinimumInRotatedSortedArray {
         }
     }
     
-
+    public static void main(String[] args) {
+    	FindMinimumInRotatedSortedArray instance = new FindMinimumInRotatedSortedArray();
+    	int[] nums;
+    	
+//    	nums = new int[]{3,4,5,1,2};
+//    	System.out.println("result=" + instance.findMinX(nums));
+    	
+//    	nums = new int[]{2, 1};
+//    	System.out.println("result=" + instance.findMinX(nums));
+    	
+    	nums = new int[]{4,5,6,1,2,3};
+    	System.out.println("result=" + instance.findMinX(nums));
+	}
 
 }
