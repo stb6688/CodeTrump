@@ -15,6 +15,7 @@ public @interface Leetcode {
 		BFS,
 		DFS,
 		TRIE,
+		SERIALIZE,
 	};
 	
 	// date of completion
