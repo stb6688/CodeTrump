@@ -14,6 +14,11 @@ public @interface Leetcode {
 		TREE,
 		BFS,
 		DFS,
+		BST,
+		PREORDER,
+		POSTORDER,
+		INORDER,
+		TABLE,
 		TRIE,
 		SERIALIZE,
 	};

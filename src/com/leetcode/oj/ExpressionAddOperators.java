@@ -2,72 +2,72 @@ package com.leetcode.oj;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
-public class ExpressionAddOperators {
-	private final Map<List<Integer>, List<StringBuilder>> cache = new HashMap<>();
-    private static final char[] signs = {'+', '-', '*'};
-    public List<String> addOperators(String num, int target) {
-        // edge case
-        if (num.length() == 0)
-            return Collections.emptyList();
-        List<StringBuilder> builders = help(num.toCharArray(), 0, target);
-        List<String> results = new ArrayList<>();
-        for (StringBuilder builder : builders)
-            results.add(builder.toString());
-        return results;
-    }
-    
-    private List<StringBuilder> help(char[] chars, int i, int target) {
-        List<Integer> key = new ArrayList<>(2);
-        key.add(i);
-        key.add(target);
-        List<StringBuilder> results = cache.get(key);
-        if (results != null)
-            return results;
-        results = new ArrayList<>();
-        if (i == chars.length - 1) {
-            if (chars[i] - '0' == target)
-                results.add(new StringBuilder().append(chars[i]));
-        } else {
-            int curr = chars[i] - '0';
-            List<StringBuilder> subs = Collections.emptyList();
-            for (char sign : signs) {
-                switch (sign) {
-                    case '+':
-                        subs = help(chars, i+1, target - curr);
-                        break;
-                    case '-':
-                        subs = help(chars, i+1, curr - target);
-                        break;
-                    case '*':
-                        if (curr != 0 && target % curr == 0)
-                            subs = help(chars, i+1, target / curr);
-                        break;
-                }
-                for (StringBuilder sub : subs) {
-                    StringBuilder result = new StringBuilder();
-                    result.append(curr).append(sign).append(sub);
-                    results.add(result);
-                }
-            }
-        }
-        cache.put(key, results);
-        return results;
-    }
-    
-    public static void main(String[] args) {
-    	ExpressionAddOperators instance = new ExpressionAddOperators();
-    	String num;
-    	int target;
-    	
-    	num = "232";
-    	target = 8;
-    	
-    	List<String> results = instance.addOperators(num, target);
-    	System.out.println("results=" + results);
+public abstract class ExpressionAddOperators {
+	public abstract List<String> addOperators(String num, int target);
+	
+	public static void main(String[] args) {
+		ExpressionAddOperators instance = new SolutionI();
+		String num; int target;
+		List<String> results;
+		
+		num = "232"; target = 8;
+		results = instance.addOperators(num, target);
+		System.out.println("results=" + results);
 	}
 
+	static class SolutionI extends ExpressionAddOperators {
+		private static final char[] ops = {'+', '-', '*'};
+	    public List<String> addOperators(String num, int target) {
+	    	if (num == null || num.length() == 0)
+	    		return Collections.emptyList();
+	        char[] chars = num.toCharArray();
+	        List<StringBuilder> builders = new ArrayList<>();
+	        StringBuilder builder0 = new StringBuilder();
+	        builder0.append(chars[0]);
+	        builders.add(builder0);
+	        int idx = 1;
+	        while (idx < num.length()) {
+	            List<StringBuilder> nextBuilders = new ArrayList<>();
+	            char ch = chars[idx++];
+	            for (StringBuilder builder : builders) {
+	                for (char op : ops) {
+	                    StringBuilder nextBuilder = new StringBuilder(builder);
+	                    nextBuilder.append(op).append(ch);
+	                    nextBuilders.add(nextBuilder);
+	                }
+	            }
+	            builders = nextBuilders;
+	        }
+	        
+System.out.println("builders:\n" + builders);
+	        List<String> results = new ArrayList<>();
+	        for (StringBuilder builder : builders) {
+	            Deque<Character> q = new LinkedList<>();
+	            for (int i = 0; i < builder.length(); i++) {
+	                char ch = builder.charAt(i);
+	                if (ch == '*')
+	                    q.addLast((char)((q.pollLast() - '0')*(builder.charAt(++i) - '0') + '0'));
+	                else
+	                    q.addLast(ch); // SYNTAX: no add() for Deque, only addFirst() & addLast()
+	            }
+	            int val = q.pollFirst() - '0';
+	            while (!q.isEmpty()) {
+	                char op = q.pollFirst();
+	                int val2 = q.pollFirst() - '0';
+	                if (op == '+')
+	                    val += val2;
+	                else
+	                    val -= val2;
+	            }
+	            if (val == target)
+	                results.add(builder.toString());
+	        }
+	        
+	        return results;
+	    }
+	}
 }

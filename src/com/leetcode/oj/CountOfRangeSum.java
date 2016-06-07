@@ -1,45 +1,16 @@
 package com.leetcode.oj;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-public class CountOfRangeSum {
-	public int countRangeSum(int[] nums, int lower, int upper) {
-        int count = 0;
-        int lsum = 0;
-        int[] lsums = new int[nums.length];
-        for (int i = 0; i < nums.length; i++) {
-            lsums[i] = lsum;
-            lsum += nums[i];
-        }
-        TreeMap<Long, TreeSet<Integer>> sumIndices = new TreeMap<>();
-        long rsum = 0;
-        for (int i = nums.length-1; i >=0; i--) {
-            TreeSet<Integer> indices = sumIndices.get(rsum);
-            if (indices == null) {
-                indices = new TreeSet<>();
-                sumIndices.put(rsum, indices);
-            }
-            indices.add(i);
-            rsum += nums[i];
-        }
-        long sum = 0;
-        for (int num : nums)
-            sum += num;
-        
-        for (int i = 0; i < nums.length; i++) {
-            long rlower = sum - lsums[i] - upper;
-            long rupper = sum - lsums[i] - lower;
-            for (Map.Entry<Long, TreeSet<Integer>> entry : sumIndices.subMap(rlower, true, rupper, true).entrySet()) {
-                count += entry.getValue().tailSet(i, true).size();
-            }
-        }
-        return count;
-    }
-	
+public abstract class CountOfRangeSum {
+	public abstract int countRangeSum(int[] nums, int lower, int upper);
 	public static void main(String[] args) {
-		CountOfRangeSum instance = new CountOfRangeSum();
+		CountOfRangeSum instance = new SolutionII();
 		int[] nums;
 		int lower, upper;
 		
@@ -69,4 +40,87 @@ public class CountOfRangeSum {
 		System.out.println("result=" + result);
 		System.out.println(String.format("total time=%,dms", (t2 - t1)));
 	}
+	
+	static class SolutionII extends CountOfRangeSum {
+		public int countRangeSum(int[] nums, int lower, int upper) {
+	        if (nums == null || nums.length == 0)
+	            return 0;
+	        int[] lefts = new int[nums.length];
+	        int left = 0, right = 0, total = 0;
+	        Comparator<List<Integer>> comp = new Comparator<List<Integer>>() {
+	            @Override
+	            public int compare(List<Integer> l1, List<Integer> l2) {
+	                return l1.get(0) == l2.get(0) ? l1.get(1) - l2.get(1) : l1.get(0) - l2.get(0);
+	            }
+	        };
+	        TreeSet<List<Integer>> tree = new TreeSet<>(comp);
+	        for (int i = 0; i < nums.length; i++) {
+	            int num = nums[i];
+	            total += num;
+	            lefts[i] = left;
+	            left += num;
+	            add(tree, right, i);
+	            right += nums[nums.length-1-i];
+	        }
+	        
+	        int result = 0;
+	        for (int i = 0; i < nums.length; i++) {
+	            List<Integer> minList = new ArrayList<>(2);
+	            int min = lower - total + lefts[i];
+	            minList.add(min);
+	            minList.add(0);
+	            List<Integer> maxList = new ArrayList<>(2);
+	            int max = upper - total + lefts[i];
+	            maxList.add(max);
+	            maxList.add(nums.length);
+	            result += tree.subSet(minList, true, maxList, true).size();
+	        }
+	        return result;
+	    }
+	    
+	    private void add(TreeSet<List<Integer>> tree, int num, int idx) {
+	        List<Integer> list = new ArrayList<>(2);
+	        list.add(num);
+	        list.add(idx);
+	        tree.add(list);
+	    }
+	}
+	
+	
+	// Solution I: TLE
+	static class SolutionI extends CountOfRangeSum {
+		public int countRangeSum(int[] nums, int lower, int upper) {
+	        int count = 0;
+	        int lsum = 0;
+	        int[] lsums = new int[nums.length];
+	        for (int i = 0; i < nums.length; i++) {
+	            lsums[i] = lsum;
+	            lsum += nums[i];
+	        }
+	        TreeMap<Long, TreeSet<Integer>> sumIndices = new TreeMap<>();
+	        long rsum = 0;
+	        for (int i = nums.length-1; i >=0; i--) {
+	            TreeSet<Integer> indices = sumIndices.get(rsum);
+	            if (indices == null) {
+	                indices = new TreeSet<>();
+	                sumIndices.put(rsum, indices);
+	            }
+	            indices.add(i);
+	            rsum += nums[i];
+	        }
+	        long sum = 0;
+	        for (int num : nums)
+	            sum += num;
+	        
+	        for (int i = 0; i < nums.length; i++) {
+	            long rlower = sum - lsums[i] - upper;
+	            long rupper = sum - lsums[i] - lower;
+	            for (Map.Entry<Long, TreeSet<Integer>> entry : sumIndices.subMap(rlower, true, rupper, true).entrySet()) {
+	                count += entry.getValue().tailSet(i, true).size();
+	            }
+	        }
+	        return count;
+	    }
+	}
+	
 }
