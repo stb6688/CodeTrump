@@ -85,16 +85,11 @@ public class ArrayUtil {
 	 * @param s
 	 * @return
 	 */
-	public static char[][] str2int2DCharArray(String s) {
-		s = s.substring(1, s.length()-1);
-		if (s.length() == 0)
-			return new char[][]{};
-		s = trimParenthesis(s);
-		String[] rows = s.split(",");
-		char[][] results = new char[rows.length][];
-		int i = 0;
-		for (String row : rows)
-			results[i++] = row.trim().toCharArray();
+	public static char[][] strArrayTo2DCharArray(String[] sArray) {
+		char[][] results = new char[sArray.length][];
+		for (int i = 0; i < sArray.length; i++) {
+			results[i] = sArray[i].toCharArray();
+		}
 		return results;
 	}
 	
@@ -106,11 +101,17 @@ public class ArrayUtil {
 		return results;
 	}
 	
-	public static char[][] strArrayTo2DCharArray(String[] sArray) {
-		char[][] results = new char[sArray.length][];
-		for (int i = 0; i < sArray.length; i++) {
-			results[i] = sArray[i].toCharArray();
-		}
+	/**
+	 * Input ["abc", "efg"] -> array with 2 strings.
+	 * @param s
+	 * @return
+	 */
+	public static String[] str2strArray(String s) {
+		if (s == null || (s = s.trim()).isEmpty())
+			return new String[0];
+		s = trimParenthesis(s);
+		String[] results = s.split(",");
+		for (int i = 0; i < results.length; results[i] = trimQuotes(results[i++]));
 		return results;
 	}
 	
@@ -127,11 +128,41 @@ public class ArrayUtil {
 			char head = builder.charAt(0);
 			if (head == '(' || head == '[' || head == '{')
 				builder.deleteCharAt(0);
+			else
+				break;
 		}
 		while (builder.length() > 0) {
 			char tail = builder.charAt(builder.length() - 1);
 			if (tail == '(' || tail == '[' || tail == '{')
 				builder.deleteCharAt(builder.length() - 1);
+			else
+				break;
+		}
+		return builder.toString();
+	}
+	
+	/**
+	 * Trim leading/ trailing single or double quotes.
+	 * @param s
+	 * @return
+	 */
+	public static String trimQuotes(String s) {
+		if (s == null || s.isEmpty())
+			return s;
+		StringBuilder builder = new StringBuilder(s);
+		while (builder.length() > 0) {
+			char head = builder.charAt(0);
+			if (head == '\'' || head == '\"')
+				builder.deleteCharAt(0);
+			else
+				break;
+		}
+		while (builder.length() > 0) {
+			char tail = builder.charAt(builder.length() - 1);
+			if (tail == '\'' || tail == '\"')
+				builder.deleteCharAt(builder.length() - 1);
+			else
+				break;
 		}
 		return builder.toString();
 	}

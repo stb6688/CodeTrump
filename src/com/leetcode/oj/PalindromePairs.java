@@ -7,12 +7,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.leetcode.util.ArrayUtil;
+import com.leetcode.util.LeetcodeUtils;
+
 public abstract class PalindromePairs {
 	
 	public abstract List<List<Integer>> palindromePairs(String[] words);
     public static void main(String[] args) {
     	PalindromePairs instance = new SolutionIII();
     	String[] words;
+    	long t1, t2;
     	List<List<Integer>> results;
     	
 //    	[[0, 1], [1, 0]]
@@ -26,7 +30,12 @@ public abstract class PalindromePairs {
 //    	results = instance.palindromePairs(words);
 //    	System.out.println("results=" + results);
     	
-    	words = new String[]{"a", ""};
+//    	words = new String[]{"a", ""};
+//    	results = instance.palindromePairs(words);
+//    	System.out.println("results=" + results);
+    	
+    	// [[0,1],[1,0],[2,1],[2,3],[0,3],[3,2]]
+    	words = new String[]{"ab","ba","abc","cba"};
     	results = instance.palindromePairs(words);
     	System.out.println("results=" + results);
     	
@@ -34,82 +43,98 @@ public abstract class PalindromePairs {
 //    	words = new String[]{"bat", "tab", "cat"};
 //    	results = instance.palindromePairs(words);
 //    	System.out.println("results=" + results);
+    	
+    	
+//    	words = ArrayUtil.str2strArray(LeetcodeUtils.readText(instance));
+//    	t1 = System.currentTimeMillis();
+//    	results = instance.palindromePairs(words);
+//    	t2 = System.currentTimeMillis();
+//    	System.out.println(String.format("results=%s, total time=%,dms", results, (t2 - t1)));
 	}
     
     static class SolutionIII extends PalindromePairs {
     	public List<List<Integer>> palindromePairs(String[] words) {
-            Map<String, Set<Integer>> leftRights = new HashMap<>();
-            Map<String, Set<Integer>> rightLefts = new HashMap<>();
+            Map<String, List<Integer>> leftIndices = new HashMap<>();
+            Map<String, List<Integer>> rightIndices = new HashMap<>();
+            Set<String> visited = new HashSet<>();
             for (int i = 0; i < words.length; i++) {
-                String word = words[i];
-                getPairs(word, i, leftRights, rightLefts);
+                if (visited.add(words[i]))
+                    addPairs(words[i], i, leftIndices, rightIndices);
             }
-            Set<List<Integer>> results = new HashSet<>();
+for (Map.Entry<String, List<Integer>> entry : leftIndices.entrySet()) {
+	for (int i : entry.getValue())
+		System.out.println("left=" + entry.getKey() + ", right=" + words[i]);
+}
+System.out.println("------------");
+for (Map.Entry<String, List<Integer>> entry : rightIndices.entrySet()) {
+	for (int i : entry.getValue())
+		System.out.println("left=" + words[i] + ", right=" + entry.getKey());
+}
+            List<List<Integer>> results = new ArrayList<>();
+            List<Integer> indices;
             for (int i = 0; i < words.length; i++) {
                 String word = words[i];
-                Set<Integer> rights = leftRights.get(word);
-                if (rights != null) {
-                    for (int r : rights)
+                if ((indices = leftIndices.get(word)) != null) {
+                    for (int r : indices)
                         addResult(i, r, results);
                 }
-                Set<Integer> lefts = rightLefts.get(word);
-                if (lefts != null) {
-                    for (int l : lefts)
+                if ((indices = rightIndices.get(word)) != null) {
+                    for (int l : indices)
                         addResult(l, i, results);
                 }
             }
-            return new ArrayList<>(results);
+            
+            return results;
         }
         
-        private void getPairs(String word, int idx, Map<String, Set<Integer>> leftRights, 
-            Map<String, Set<Integer>> rightLefts) {
-            for (int i = 0; i <= word.length(); i++) {
-                getPair(word, idx, i-1, i+1, leftRights, rightLefts);
-                getPair(word, idx, i-1, i, leftRights, rightLefts);
-            }
-        }
-        
-        private void getPair(String word, int idx, int i, int j, Map<String, Set<Integer>> leftRights, 
-            Map<String, Set<Integer>> rightLefts) {
-            while (i >= 0 && j < word.length()) {
-                if (word.charAt(i) != word.charAt(j))
-                    break;
-                i--;
-                j++;
-            }
-            if (i < 0 && j <= word.length()) {
-                String left = reverse(word.substring(j, word.length()));
-                add(left, idx, leftRights);
-            } 
-            if (j == word.length() && i < word.length()) {
-                String right = reverse(word.substring(0, i+1));
-                add(right, idx, rightLefts);
-            }
-        }
-        
-        private String reverse(String s) {
-            StringBuilder builder = new StringBuilder();
-            for (char ch : s.toCharArray())
-                builder.insert(0, ch);
-            return builder.toString();
-        }
-        
-        private void add(String key, int idx, Map<String, Set<Integer>> map) {
-            Set<Integer> vals = map.get(key);
-            if (vals == null) {
-                vals = new HashSet<>();
-                map.put(key, vals);
-            }
-            vals.add(idx);
-        }
-        
-        private void addResult(int l, int r, Set<List<Integer>> results) {
+        private void addResult(int l, int r, List<List<Integer>> results) {
             if (l != r) {
                 List<Integer> result = new ArrayList<>(2);
                 result.add(l);
                 result.add(r);
                 results.add(result);
             }
+        }
+        
+        private void addPairs(String word, int idx, Map<String, List<Integer>> leftIndices, Map<String, List<Integer>> rightIndices) {
+            // with pivot
+            for (int p = 0; p < word.length(); p++)
+                addPair(word, p-1, p+1, leftIndices, rightIndices, idx);
+            // without pivot
+            for (int i = -1; i < word.length(); i++)
+                addPair(word, i, i+1, leftIndices, rightIndices, idx);
+        }
+        
+        private void addPair(String word, int l, int r, Map<String, List<Integer>> leftIndices, 
+            Map<String, List<Integer>> rightIndices, int idx) {
+            StringBuilder builder = new StringBuilder();
+            while (l >= 0 && r < word.length()) {
+                if (word.charAt(l) != word.charAt(r))
+                    break;
+                l--;
+                r++;
+            }
+            if (l < 0 && r == word.length()) {
+                add(leftIndices, "", idx);
+                add(rightIndices, "", idx);
+            } else if (l < 0) {
+                while (r < word.length())
+                    builder.insert(0, word.charAt(r++));
+                add(leftIndices, builder.toString(), idx);
+            } else if (r == word.length()) {
+                while (l >= 0)
+                    builder.append(word.charAt(l--));
+                add(rightIndices, builder.toString(), idx);
+            }
+        }
+        
+        private void add(Map<String, List<Integer>> map, String pair, int idx) {
+            List<Integer> indices = map.get(pair);
+            if (indices == null) {
+                indices = new ArrayList<>();
+                map.put(pair, indices);
+            }
+            indices.add(idx);
         }
     }
     

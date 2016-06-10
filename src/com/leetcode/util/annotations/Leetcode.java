@@ -21,6 +21,8 @@ public @interface Leetcode {
 		TABLE,
 		TRIE,
 		SERIALIZE,
+		
+		REMEMBER,	// just remember this problem, maybe applied in other cases
 	};
 	
 	// date of completion
