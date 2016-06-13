@@ -2,10 +2,12 @@ package com.leetcode.oj;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -33,6 +35,45 @@ public abstract class CountOfSmallerNumbersAfterSelf {
 		long t2 = System.currentTimeMillis();
 		System.out.println("results=" + results);
 		System.out.println(String.format("total time=%,dms", (t2 - t1)));
+	}
+	
+	
+	// Solution V: TLE
+    // O(nlogn). sort numbers from high to low, then poll from q and add to a tree sorted by index.
+    // must deal with duplicates.
+	static class SolutionV extends CountOfSmallerNumbersAfterSelf {
+		public List<Integer> countSmaller(int[] nums) {
+	        // list: idx, val
+	        Comparator<List<Integer>> comp = new Comparator<List<Integer>>(){
+	            public int compare(List<Integer> l1, List<Integer> l2) {
+	                return l2.get(1) == l1.get(1) ? l2.get(0) - l1.get(0) : l2.get(1) - l1.get(1);
+	            }
+	        };
+	        PriorityQueue<List<Integer>> q = new PriorityQueue<>(comp);
+	        for (int i = 0; i < nums.length; i++) {
+	            List<Integer> list = new ArrayList<>(2);
+	            list.add(i);
+	            list.add(nums[i]);
+	            q.add(list);
+	        }
+	        TreeSet<Integer> indices = new TreeSet<>();
+	        Map<Integer, Integer> valDups = new HashMap<>();
+	        List<Integer> results = new ArrayList<>();
+	        for (int i = 0; i < nums.length; i++)
+	            results.add(0);
+	        while (!q.isEmpty()) {
+	            List<Integer> list = q.poll();
+	            int index = list.get(0), val = list.get(1);
+	            indices.add(index);
+	            Integer dups = valDups.get(val);
+	            if (dups == null)
+	                dups = 0;
+	            valDups.put(val, dups+1);
+	            int count = indices.headSet(index, false).size() - dups; // for dups, i always add higher index first
+	            results.set(index, count);
+	        }
+	        return results;
+	    }
 	}
 	
 	
