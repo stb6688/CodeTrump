@@ -21,7 +21,6 @@ public abstract class HappyNumber {
 		public boolean isHappy(int n) {
 	        Set<Set<Integer>> visited = new HashSet<>();
 	        while (n != 1) {
-System.out.println("n=" + n);
 	            Set<Integer> digits = new HashSet<>();
 	            while (n > 0) {
 	                digits.add(n % 10);
