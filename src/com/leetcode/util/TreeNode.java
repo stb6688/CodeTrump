@@ -122,6 +122,11 @@ public class TreeNode {
 	
 	private static boolean isDigit(String s) {
 		char ch = s.charAt(0);
+		if (ch == '-') { // negative sign
+			if (s.length() == 1)
+				return false;
+			ch = s.charAt(1);
+		}
 		return ch >= '0' && ch <= '9';
 	}
 	
