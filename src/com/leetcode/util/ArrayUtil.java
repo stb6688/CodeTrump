@@ -116,6 +116,24 @@ public class ArrayUtil {
 	}
 	
 	/**
+	 * Input [["EZE","AXA"],["TIA","ANU"]] -> 2D string[][] array.
+	 * @param s
+	 * @return
+	 */
+	public static String[][] strTo2DStrArray(String s) {
+		if (s == null || (s = s.trim()).isEmpty())
+			return new String[0][];
+		s = trimParenthesis(s);
+		String[] splits = s.split("]");
+		String[][] results = new String[splits.length][];
+		int idx = 0;
+		for (String split : splits) {
+			results[idx++] = str2strArray(split);
+		}
+		return results;
+	}
+	
+	/**
 	 * Remove leading & trailing brackets.
 	 * @param s
 	 * @return

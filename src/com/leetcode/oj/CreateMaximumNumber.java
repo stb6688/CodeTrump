@@ -11,20 +11,102 @@ import com.leetcode.util.ArrayUtil;
 public abstract class CreateMaximumNumber {
 	public abstract int[] maxNumber(int[] nums1, int[] nums2, int k);
 	public static void main(String[] args) {
-		CreateMaximumNumber instance = new SolutionI();
+		CreateMaximumNumber instance = new SolutionII();
 		int[] nums1, nums2; int k;
 		int[] result;
 		long t1, t2;
 		
-		nums1 = ArrayUtil.str2intArray("[3, 4, 6, 5]");
-		nums2 = ArrayUtil.str2intArray("[9, 1, 2, 5, 8, 3]");
-		k = 5;
+		// 9,8,6,5,3
+//		nums1 = ArrayUtil.str2intArray("[3, 4, 6, 5]");
+//		nums2 = ArrayUtil.str2intArray("[9, 1, 2, 5, 8, 3]");
+//		k = 5;
+		
+		// 6,7,6,0,4
+//		nums1 = ArrayUtil.str2intArray("[6, 7]");
+//		nums2 = ArrayUtil.str2intArray("[6, 0, 4]");
+//		k = 5;
+		
+		nums1 = ArrayUtil.str2intArray("[3, 9]");
+		nums2 = ArrayUtil.str2intArray("[8, 9]");
+		k = 3;
 		
 		t1 = System.currentTimeMillis();
 		result = instance.maxNumber(nums1, nums2, k);
 		t2 = System.currentTimeMillis();
 		System.out.println(String.format("result=%s, total time=%,dms", Arrays.toString(result), (t2 - t1)));
 	}
+	
+	
+	static class SolutionII extends CreateMaximumNumber {
+		public int[] maxNumber(int[] nums1, int[] nums2, int k) {
+	        return dp(nums1, 0, nums2, 0, k);
+	    }
+	    
+	    private Map<List<Integer>, int[]> cache = new HashMap<>();
+	    // guarantee k > 0; guarnatee i & j are valid
+	    private int[] dp(int[] nums1, int i, int[] nums2, int j, int k) {
+	        List<Integer> key = new ArrayList<>();
+	        key.add(i);
+	        key.add(j);
+	        key.add(k);
+	        int[] result = cache.get(key);
+	        if (result != null)
+	            return result;
+	        result = new int[k];
+	        int maxDigit = 0;
+	        List<int[]> maxMoves = new ArrayList<>();
+	        maxDigit = maxDigit(nums1, i, nums2, j, k, maxDigit, maxMoves, true);
+	        maxDigit = maxDigit(nums2, j, nums1, i, k, maxDigit, maxMoves, false);
+	        result[0] = maxDigit;
+	        if (k > 1) {
+	            int[] maxSub = new int[k-1];
+	            for (int[] move : maxMoves) {
+	                int[] sub = dp(nums1, i+move[0], nums2, j+move[1], k-1);
+	                if (bigger(sub, maxSub))
+	                    maxSub = sub;
+	            }
+	            for (int x = 1; x < result.length; x++)
+	                result[x] = maxSub[x-1];
+	        }
+	        
+	        cache.put(key, result);
+	        return result;
+	    }
+	    
+	    private int maxDigit(int[] nums1, int i, int[] nums2, int j, int k, int maxDigit, List<int[]> maxMoves, boolean turn) {
+	        int d = 0;
+	        while (i+d < nums1.length && nums1.length-(i+d) + nums2.length-j >= k) {
+	            int digit = nums1[i+d];
+	            if (digit > maxDigit) {
+	                maxDigit = digit;
+	                maxMoves.clear();
+	                if (turn)
+	                    maxMoves.add(new int[]{d+1, 0});
+	                else
+	                    maxMoves.add(new int[]{0, d+1});
+	            } else if (digit == maxDigit) {
+	                if (turn)
+	                    maxMoves.add(new int[]{d+1, 0});
+	                else
+	                    maxMoves.add(new int[]{0, d+1});
+	            }
+	            d++;
+	        }
+//System.out.println(maxDigit);
+	        return maxDigit;
+	    }
+	    
+	    private boolean bigger(int[] a1, int[] a2) {
+	        for (int i = 0; i < a1.length; i++) {
+	            if (a1[i] > a2[i])
+	                return true;
+	            else if (a1[i] < a2[i])
+	                return false;
+	        }
+	        return false;
+	    }
+	}
+	
 	
 	static class SolutionI extends CreateMaximumNumber {
 		// nums1.length-i+nums2.length-i >= k
