@@ -13,7 +13,7 @@ public abstract class ExpressionAddOperators {
 	public abstract List<String> addOperators(String num, int target);
 	
 	public static void main(String[] args) {
-		ExpressionAddOperators instance = new SolutionIII();
+		ExpressionAddOperators instance = new SolutionIV();
 		String num; int target;
 		List<String> results;
 		
@@ -21,11 +21,89 @@ public abstract class ExpressionAddOperators {
 //		num = "232"; target = 8;
 		
 		// 1*0 + 5, 10-5
-		num = "105"; target = 5;
+		num = "2147483648"; target = -2147483648;
+		
+		// 10+5, 1+0+5
+//		num = "105"; target = 5;
 		
 		
 		results = instance.addOperators(num, target);
 		System.out.println("results=" + results);
+	}
+	
+	
+	static class SolutionIV extends ExpressionAddOperators {
+		private Map<List<Integer>, List<String>> cache = new HashMap<>();
+	    private static final char[] ops = {'+', '-', '*'};
+	    public List<String> addOperators(String num, int target) {
+	        if (num == null || num.isEmpty())
+	            return Collections.emptyList();
+	        List<String> results = new ArrayList<>();
+	        List<String> strs = build(num, 0, num.length()-1);
+	        for (String str : strs) {
+	            if (eval(str) == target)
+	                results.add(str);
+	        }
+	        return results;
+	    }
+	    
+	    private List<String> build(String num, int l, int r) {
+	        if (l > r)
+	            return null;
+	        List<Integer> key = new ArrayList<>(2);
+	        key.add(l);
+	        key.add(r);
+	        List<String> results = cache.get(key);
+	        if (results != null)
+	            return results;
+	         results = new ArrayList<>();
+	        // results.add(num.substring(l, r+1)); // ERROR: must skip format like "05"
+	        for (int d = l+1; d <= r+1; d++) {
+	            String left = num.substring(l, d);
+	            List<String> subs = build(num, d, r);
+	            if (subs == null)
+	                results.add(left);
+	            else {
+	                for (String sub : subs) {
+	                    for (char op : ops) {
+	                        StringBuilder builder = new StringBuilder();
+	                        builder.append(left).append(op).append(sub);
+	                        results.add(builder.toString());
+	                    }
+	                }
+	            }
+	            if (left.equals("0"))
+	                break;
+	        }
+	        cache.put(key, results);
+	        return results;
+	    }
+	    
+	    private int eval(String s) {
+	        char op = '+';
+	        Stack<Integer> stack = new Stack<>();
+	        int num = 0;
+	        for (int i = 0; i < s.length(); i++) {
+	            char ch = s.charAt(i);
+	            if (ch >= '0' && ch <= '9')
+	                num = num*10 + (ch - '0');
+	            // finish a number
+	            if (i == s.length()-1 || ch < '0' || ch > '9') {
+	                if (op == '+')
+	                    stack.push(num);
+	                else if (op == '-')
+	                    stack.push(-num);
+	                else
+	                    stack.push(stack.pop()*num);
+	                num = 0;
+	                op = ch; // not ideal for last digit, but it's the last one
+	            }
+	        }
+	        int result = 0;
+	        while (!stack.isEmpty())
+	            result += stack.pop();
+	        return result;
+	    }
 	}
 	
 	

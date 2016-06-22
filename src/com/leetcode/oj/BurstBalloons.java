@@ -1,54 +1,28 @@
 package com.leetcode.oj;
 
+
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.leetcode.util.ArrayUtil;
 
-public class BurstBalloons {
-	
-	private Map<Integer, Integer> cache = new HashMap<>();
-    public int maxCoins(int[] nums) {
-        if (nums == null || nums.length == 0)
-            return 0;
-        return help(nums, 0, nums.length-1);
-    }
-    
-    private int help(int[] nums, int l, int r) {
-        // termination
-        if (l == r)
-            return nums[l];
-        if (l > r || l < 0 || r >= nums.length)
-            return 0;
-        Integer key = l*nums.length + r;
-        Integer max = cache.get(key);
-        if (max != null)
-            return max;
-        max = 0;
-        for (int i = l; i <= r; i++) {
-            int coins = nums[i];
-            if (i-1 >= l) // ERROR: i-1 >= 0
-                coins *= nums[i-1];
-            if (i+1 <= r) // ERROR: i+1 <= length
-                coins *= nums[i+1];
-            coins += help(nums, l, i-1) + help(nums, i+1, r);
-            max = Math.max(max, coins);
-        }
-        cache.put(key, max);
-        return max;
-    }
-    
+public abstract class BurstBalloons {
+	public abstract int maxCoins(int[] nums);
     public static void main(String[] args) {
-    	BurstBalloons instance = new BurstBalloons();
+    	BurstBalloons instance = new SolutionIV();
     	int[] nums;
     	
     	// 167
-    	nums = ArrayUtil.str2intArray("[3, 1, 5, 8]");
+//    	nums = ArrayUtil.str2intArray("[3, 1, 5, 8]");
+    	
+//    	nums = new int[]{7,9,8,0,7,1,3,5,5,2,3,3};
+    	
+    	nums = new int[]{8,2,6,8,9,8,1,4,1,5,3,0,7,7,0,4,2,2,5};
+    	
+    	// 32
+//    	nums = ArrayUtil.str2intArray("[8, 3]");
     	
 //    	nums = ArrayUtil.str2intArray("[8,2,6,8,9,8,1,4,1,5,3,0,7,7,0,4,2,2]");
     	
@@ -60,4 +34,64 @@ public class BurstBalloons {
     	System.out.println("result=" + result);
     	System.out.println(String.format("total time=%,dms", (t2 - t1)));
 	}
+    
+    
+    static class SolutionIV extends BurstBalloons {
+    	public class DNode {
+            DNode prev, next;
+            int val;
+            public DNode(int val) {
+                this.val = val;
+            }
+            
+            public void append(DNode node) {
+                DNode next = this.next;
+                this.next = node;
+                node.prev = this;
+                node.next = next;
+                next.prev = node;
+            }
+            
+            public void remove() {
+                this.prev.next = this.next;
+                this.next.prev = this.prev;
+            }
+        }
+        
+        public int maxCoins(int[] nums) {
+            DNode dd = new DNode(1), n = dd;
+            dd.next = dd;
+            dd.prev = dd;
+            for (int num : nums) {
+                n.append(new DNode(num));
+                n = n.next;
+            }
+            return bt(dd);
+        }
+        
+        private Map<List<Integer>, Integer> cache = new HashMap<>();
+        private int bt(DNode dd) {
+            List<Integer> key = new ArrayList<>();
+            DNode curr = dd.next;
+            while (curr != dd) {
+                key.add(curr.val);
+                curr = curr.next;
+            }
+            Integer max = cache.get(key);
+            if (max != null)
+                return max;
+            max = 0;
+            
+            curr = dd.next;
+            while (curr != dd) {
+                curr.remove(); // modify
+                int val = curr.val*curr.prev.val*curr.next.val + bt(dd); // recursion
+                max = Math.max(max, val);
+                curr.prev.append(curr); // restore
+                curr = curr.next;
+            }
+            cache.put(key, max);
+            return max;
+        }
+    }
 }
