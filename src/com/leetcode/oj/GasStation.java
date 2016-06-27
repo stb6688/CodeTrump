@@ -3,7 +3,7 @@ package com.leetcode.oj;
 public abstract class GasStation {
 	public abstract int canCompleteCircuit(int[] gas, int[] cost);
 	public static void main(String[] args) {
-		GasStation instance = new SolutionII();
+		GasStation instance = new SolutionIV();
 		int[] gas, cost;
 		int result;
 		
@@ -24,6 +24,37 @@ public abstract class GasStation {
 		
 		result = instance.canCompleteCircuit(gas, cost);
 		System.out.println("result=" + result);
+	}
+	
+	
+	static class SolutionIV extends GasStation {
+		public int canCompleteCircuit(int[] gas, int[] cost) {
+	        int[] deltas = new int[gas.length];
+	        for (int i = 0; i < gas.length; deltas[i] = gas[i] - cost[i], i++);
+	        int maxSum = Integer.MIN_VALUE, maxStart = -1;
+	        int sum = 0, start = 0;
+	        for (int i = 0; i < gas.length; i++) {
+	            sum += deltas[i];
+	            if (sum < 0) {
+	                sum = 0;
+	                start = i+1;
+	            } else if (sum >= maxSum) {
+	                maxSum = sum;
+	                maxStart = start;
+	            }
+	        }
+	        if (maxStart < 0)
+	            return -1;
+	        sum = 0;
+	        int idx = maxStart;
+	        for (int i = 0; i < deltas.length; i++) {
+	            sum += deltas[idx];
+	            if (sum < 0)
+	                return -1;
+	            idx = (idx + 1)%deltas.length;
+	        }
+	        return maxStart;
+	    }
 	}
 	
 	

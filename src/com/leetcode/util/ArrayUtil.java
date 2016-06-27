@@ -151,7 +151,7 @@ public class ArrayUtil {
 		}
 		while (builder.length() > 0) {
 			char tail = builder.charAt(builder.length() - 1);
-			if (tail == '(' || tail == '[' || tail == '{')
+			if (tail == ')' || tail == ']' || tail == '}')
 				builder.deleteCharAt(builder.length() - 1);
 			else
 				break;

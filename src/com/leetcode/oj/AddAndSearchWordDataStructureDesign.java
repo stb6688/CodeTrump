@@ -1,8 +1,8 @@
 package com.leetcode.oj;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -19,7 +19,8 @@ public class AddAndSearchWordDataStructureDesign {
 		// false
 		instance.addWord("ran");
 		instance.addWord("rune");
-		System.out.println(instance.search(".an."));
+		System.out.println(instance.search(".an.")); // false
+		System.out.println(instance.search(".an"));  // true
 		
 	}
 	
@@ -27,51 +28,43 @@ public class AddAndSearchWordDataStructureDesign {
 	public static class WordDictionary {
 		class TrieNode {
 	        boolean isLeaf = false;
-	        Map<Character, TrieNode> map = new HashMap<>();
+	        // Map<Character, TrieNode> map = new HashMap<>();
+	        TrieNode[] children = new TrieNode[26]; // instead of map, use array with 26 letters
 	    }
 	    
 	    private TrieNode root = new TrieNode();
-	    private Map<Integer, Map<Character, TrieNode>> idxMap = new HashMap<>();
 	    public void addWord(String word) {
 	        TrieNode curr = root;
 	        for (int i = 0; i < word.length(); i++) {
 	            char ch = word.charAt(i);
-	            TrieNode next = curr.map.get(ch);
-	            if (next == null) {
-	                next = getNode(i, ch);
-	                curr.map.put(ch, next);
+	            int idx = ch - 'a';
+	            TrieNode child;
+	            if ((child = curr.children[idx]) == null) {
+	                child = new TrieNode();
+	                curr.children[idx] = child;
 	            }
-	            curr = next;
+	            curr = child;
 	        }
 	        curr.isLeaf = true;
 	    }
 	    
-	    private TrieNode getNode(int idx, char ch) {
-	        Map<Character, TrieNode> charNode = idxMap.get(idx);
-	        if (charNode == null) {
-	            charNode = new HashMap<>();
-	            idxMap.put(idx, charNode);
-	        }
-	        TrieNode node = charNode.get(ch);
-	        if (node == null) {
-	            node = new TrieNode();
-	            charNode.put(ch, node);
-	        }
-	        return node;
-	    }
-	
 	    // Returns if the word is in the data structure. A word could
 	    // contain the dot character '.' to represent any one letter.
 	    public boolean search(String word) {
-	        Set<TrieNode> nodes = new HashSet<>();
+	        List<TrieNode> nodes = new ArrayList<>();
 	        nodes.add(root);
-	        for (int i = 0; i < word.length(); i++) {
-	            Set<TrieNode> nextNodes = new HashSet<>();
-	            char ch = word.charAt(i);
+	        for (char ch : word.toCharArray()) {
+	            List<TrieNode> nextNodes = new ArrayList<>();
 	            for (TrieNode node : nodes) {
-	                for (char key : node.map.keySet()) {
-	                    if (ch == '.' || key == ch)
-	                        nextNodes.add(node.map.get(key));
+	                if (ch == '.') {
+	                    for (TrieNode child : node.children) {
+	                    	if (child != null)
+	                    		nextNodes.add(child);
+	                    }
+	                } else {
+	                    TrieNode next = node.children[ch-'a'];
+	                    if (next != null)
+	                        nextNodes.add(next);
 	                }
 	            }
 	            if (nextNodes.isEmpty())

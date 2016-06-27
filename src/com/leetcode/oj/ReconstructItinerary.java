@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -11,7 +12,7 @@ import java.util.Set;
 public abstract class ReconstructItinerary {
 	public abstract List<String> findItinerary(String[][] tickets);
 	public static void main(String[] args) {
-		ReconstructItinerary instance = new SolutionIII();
+		ReconstructItinerary instance = new SolutionIV();
 		String[][] tickets;
 		List<String> results;
 		
@@ -26,6 +27,53 @@ public abstract class ReconstructItinerary {
 		results = instance.findItinerary(tickets);
 		System.out.println("results=" + results);
 	}
+	
+	
+	static class SolutionIV extends ReconstructItinerary {
+		public List<String> findItinerary(String[][] tickets) {
+	        Map<String, List<String>> nodeNbs = new HashMap<>();
+	        for (String[] ticket : tickets) {
+	            String node = ticket[0], nb = ticket[1];
+	            List<String> nbs = nodeNbs.get(node);
+	            if (nbs == null) {
+	                nbs = new LinkedList<>();
+	                nodeNbs.put(node, nbs);
+	            }
+	            nbs.add(nb);
+	        }
+	        for (List<String> nbs : nodeNbs.values()) {
+	            Collections.sort(nbs);
+	        }
+	        List<String> result = new LinkedList<>();
+	        result.add("JFK");
+	        bt("JFK", nodeNbs, result);
+	        return result;
+	    }
+	    
+	    private boolean bt(String node, Map<String, List<String>> nodeNbs, List<String> result) {
+	        // termination
+	        if (nodeNbs.isEmpty())
+	            return true;
+	        List<String> nbs = nodeNbs.get(node);
+	        if (nbs == null)
+	            return false;
+	        List<String> copy = new LinkedList<>(nbs);
+	        for (String nb : copy) {
+	            result.add(nb); // modify
+	            nbs.remove(nb); // modify
+	            if (nbs.isEmpty())
+	                nodeNbs.remove(node);
+	            if (bt(nb, nodeNbs, result))
+	                return true;
+	            result.remove(result.size()-1); // restore
+	            nbs.add(nb);    // restore
+	            if (nbs.size() == 1)
+	                nodeNbs.put(node, nbs);
+	        }
+	        return false;
+	    }
+	}
+	
 	
 	static class SolutionIII extends ReconstructItinerary {
 		public List<String> findItinerary(String[][] tickets) {

@@ -2,6 +2,7 @@ package com.leetcode.oj;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,15 +12,18 @@ import com.leetcode.util.ArrayUtil;
 public abstract class BurstBalloons {
 	public abstract int maxCoins(int[] nums);
     public static void main(String[] args) {
-    	BurstBalloons instance = new SolutionIV();
+    	BurstBalloons instance = new SolutionV();
     	int[] nums;
     	
     	// 167
-//    	nums = ArrayUtil.str2intArray("[3, 1, 5, 8]");
+    	nums = ArrayUtil.str2intArray("[3, 1, 5, 8]");
+    	
+    	// 9
+//    	nums = ArrayUtil.str2intArray("[3, 2]");
     	
 //    	nums = new int[]{7,9,8,0,7,1,3,5,5,2,3,3};
     	
-    	nums = new int[]{8,2,6,8,9,8,1,4,1,5,3,0,7,7,0,4,2,2,5};
+//    	nums = new int[]{8,2,6,8,9,8,1,4,1,5,3,0,7,7,0,4,2,2,5};
     	
     	// 32
 //    	nums = ArrayUtil.str2intArray("[8, 3]");
@@ -34,6 +38,35 @@ public abstract class BurstBalloons {
     	System.out.println("result=" + result);
     	System.out.println(String.format("total time=%,dms", (t2 - t1)));
 	}
+    
+    
+    static class SolutionV extends BurstBalloons {
+    	public int maxCoins(int[] nums) {
+            if (nums == null || nums.length == 0)
+                return 0;
+            int[] array = new int[nums.length+2];
+            for (int i = 0; i < nums.length; i++)
+                array[1+i] = nums[i];
+            array[0] = 1;
+            array[array.length-1] = 1;
+            int[][] dp = new int[array.length][array.length];
+            for (int[] row : dp)
+                Arrays.fill(row, -1);
+            return dp(array, 1, array.length-2, dp);
+        }
+        
+        private int dp(int[] array, int l, int r, int[][] dp) {
+            if (dp[l][r] >= 0)
+                return dp[l][r];
+            if (l > r)
+            	return 0;
+            int max = 0;
+            for (int m = l; m <= r; m++)
+                max = Math.max(max, dp(array, l, m-1, dp) + dp(array, m+1, r, dp) + array[m]*array[l-1]*array[r+1]);
+            dp[l][r] = max;
+            return max;
+        }
+    }
     
     
     static class SolutionIV extends BurstBalloons {
