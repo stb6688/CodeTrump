@@ -3,7 +3,7 @@ package com.leetcode.oj;
 public abstract class FindMinimumInRotatedSortedArray {
 	public abstract int findMin(int[] nums);
     public static void main(String[] args) {
-    	FindMinimumInRotatedSortedArray instance = new SolutionIV();
+    	FindMinimumInRotatedSortedArray instance = new SolutionVI();
     	int[] nums;
     	int result;
     	
@@ -13,12 +13,65 @@ public abstract class FindMinimumInRotatedSortedArray {
 //    	nums = new int[]{2, 1};
     	// 1
 //    	nums = new int[]{4,5,6,1,2,3};
-    	
+    	// 1
     	nums = new int[]{2,3,1};
     	
     	result = instance.findMin(nums);
     	System.out.println("result=" + result);
 	}
+    
+    
+    static class SolutionVI extends FindMinimumInRotatedSortedArray {
+    	public int findMin(int[] nums) {
+            return doFind(nums, 0, nums.length-1);
+        }
+        
+        private int doFind(int[] nums, int l, int r) {
+            if (nums[l] <= nums[r])
+                return nums[l];
+            int m = (l + r) >> 1;
+            if (m-1 >= 0 && nums[m] < nums[m-1])
+                return nums[m];
+            // if left sorted & right sorted, return first on right
+            // if right rotated, go right
+            // if left rotated, go left
+            // conclusion: only if left is rotated, we go left;
+            // otherwise, go right
+            if (l <= m-1 && nums[l] > nums[m-1])
+            	return doFind(nums, l, m-1);
+            else
+            	return doFind(nums, m+1, r);
+        }
+    }
+    
+    
+    static class SolutionV extends FindMinimumInRotatedSortedArray {
+    	public int findMin(int[] nums) {
+            return doFind(nums, 0, nums.length-1);
+        }
+        
+        private int doFind(int[] nums, int l, int r) {
+            if (nums[l] <= nums[r])
+                return nums[l];
+            int m = (l + r) >> 1;
+            if (m-1 >= 0 && nums[m] < nums[m-1])
+                return nums[m];
+            // if right exists and is rotated, recurse to right
+            // FUCKED HERE: if only 2 elements [2,1], then right 
+            // is a single element sub, which we considered "sorted".
+            // but it shouldn't.
+            if (m+1 <= r && nums[m+1] > nums[r]) {
+                return doFind(nums, m+1, r);
+            } else {
+                // right not exists, or right is sorted
+                // if left is sorted, return head; if left is rotated, recurse to left
+                if (l <= m-1 && nums[l] <= nums[m-1])
+                    return nums[l];
+                else
+                    return doFind(nums, l, m-1);
+            }
+        }
+    }
 	
 	
 	static class SolutionIV extends FindMinimumInRotatedSortedArray {
@@ -33,7 +86,6 @@ public abstract class FindMinimumInRotatedSortedArray {
 	    
 	    // sub must have at least 2 elements; sub may or may not be rotated
 	    private int help(int[] nums, int l, int r) {
-System.out.println("l=" + l + ", r=" + r);
 	        if (nums[l] < nums[r])
 	            return l;
 	        if (r - l == 1)
