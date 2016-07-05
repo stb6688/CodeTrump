@@ -18,9 +18,9 @@ public abstract class CreateMaximumNumber {
 		long t1, t2;
 		
 		// 9,8,6,5,3
-//		nums1 = ArrayUtil.str2intArray("[3, 4, 6, 5]");
-//		nums2 = ArrayUtil.str2intArray("[9, 1, 2, 5, 8, 3]");
-//		k = 5;
+		nums1 = ArrayUtil.str2intArray("[3, 4, 6, 5]");
+		nums2 = ArrayUtil.str2intArray("[9, 1, 2, 5, 8, 3]");
+		k = 5;
 		
 		// 6,7,6,0,4
 //		nums1 = ArrayUtil.str2intArray("[6, 7]");
