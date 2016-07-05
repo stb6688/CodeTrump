@@ -1,7 +1,5 @@
 package com.leetcode.oj;
 
-import java.util.Arrays;
-
 import com.leetcode.util.ArrayUtil;
 
 public abstract class MaximalRectangle {

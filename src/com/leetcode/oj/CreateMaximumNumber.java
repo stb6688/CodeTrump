@@ -3,6 +3,7 @@ package com.leetcode.oj;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -11,7 +12,7 @@ import com.leetcode.util.ArrayUtil;
 public abstract class CreateMaximumNumber {
 	public abstract int[] maxNumber(int[] nums1, int[] nums2, int k);
 	public static void main(String[] args) {
-		CreateMaximumNumber instance = new SolutionII();
+		CreateMaximumNumber instance = new SolutionIII();
 		int[] nums1, nums2; int k;
 		int[] result;
 		long t1, t2;
@@ -26,14 +27,56 @@ public abstract class CreateMaximumNumber {
 //		nums2 = ArrayUtil.str2intArray("[6, 0, 4]");
 //		k = 5;
 		
-		nums1 = ArrayUtil.str2intArray("[3, 9]");
-		nums2 = ArrayUtil.str2intArray("[8, 9]");
-		k = 3;
+		// 9,8,9
+//		nums1 = ArrayUtil.str2intArray("[3, 9]");
+//		nums2 = ArrayUtil.str2intArray("[8, 9]");
+//		k = 3;
 		
 		t1 = System.currentTimeMillis();
 		result = instance.maxNumber(nums1, nums2, k);
 		t2 = System.currentTimeMillis();
 		System.out.println(String.format("result=%s, total time=%,dms", Arrays.toString(result), (t2 - t1)));
+	}
+	
+	
+	static class SolutionIII extends CreateMaximumNumber {
+		public int[] maxNumber(int[] nums1, int[] nums2, int k) {
+	        if (k == 0)
+	            return new int[0];
+	        int[] result = new int[k];
+	        List<int[]> pairs = new LinkedList<>();
+	        int[] pair0 = {0, 0};
+	        pairs.add(pair0);
+	        for (int i = 0; i < k; i++) {
+	            List<int[]> nextPairs = new LinkedList<>();
+	            int maxDigit = -1;
+	            for (int[] pair : pairs) {
+	                int idx1 = pair[0], idx2 = pair[1];
+	                for (int j = idx1; j < nums1.length && nums1.length-j+nums2.length-idx2 >= k-i; j++) {
+	                    if (nums1[j] > maxDigit) {
+	                        maxDigit = nums1[j];
+	                        nextPairs.clear();
+	                        nextPairs.add(new int[]{j+1, idx2});
+	                    }
+	                }
+	                boolean found = false;
+	                for (int j = idx2; j < nums2.length && nums1.length-idx1+nums2.length-j >= k-i; j++) {
+	                    if (nums2[j] > maxDigit) {
+	                        found = true;
+	                        maxDigit = nums2[j];
+	                        nextPairs.clear();
+	                        nextPairs.add(new int[]{idx1, j+1});
+	                    } else if (nums2[j] == maxDigit && !found) {
+	                        found = true;
+	                        nextPairs.add(new int[]{idx1, j+1});
+	                    }
+	                }
+	            }
+	            result[i] = maxDigit;
+	            pairs = nextPairs;
+	        }
+	        return result;
+	    }
 	}
 	
 	

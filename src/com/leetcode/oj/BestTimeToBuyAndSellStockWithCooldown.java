@@ -2,17 +2,19 @@ package com.leetcode.oj;
 
 import java.util.Arrays;
 
+import com.leetcode.util.ArrayUtil;
+
 public abstract class BestTimeToBuyAndSellStockWithCooldown {
 	public abstract int maxProfit(int[] prices);
     public static void main(String[] args) {
-    	BestTimeToBuyAndSellStockWithCooldown instance = new SolutionI();
+    	BestTimeToBuyAndSellStockWithCooldown instance = new SolutionII();
     	int[] prices;
     	
     	// 3
-//    	prices = new int[] {1, 2, 3, 0, 2};
+    	prices = new int[] {1, 2, 3, 0, 2};
     	
     	// 3
-    	prices = new int[] {1, 2, 4};
+//    	prices = new int[] {1, 2, 4};
     	
 //    	String s = LeetcodeUtils.readText(instance);
 //    	prices = ArrayUtil.str2intArray(s);
@@ -20,6 +22,52 @@ public abstract class BestTimeToBuyAndSellStockWithCooldown {
     	int result = instance.maxProfit(prices);
     	System.out.println("result=" + result);
 	}
+    
+    
+    static class SolutionII extends BestTimeToBuyAndSellStockWithCooldown {
+    	public int maxProfit(int[] prices) {
+            if (prices.length <= 1)
+                return 0;
+            // add tail padding column; reachable only
+            int rows = 4, cols = prices.length+1;
+            // 0: buy
+            // 1: sell
+            // 2: cool, bought
+            // 3: cool, sold
+            int[][] dp = new int[rows][cols];
+            for (int r = 0; r < rows; Arrays.fill(dp[r++], Integer.MIN_VALUE));
+            dp[3][0] = 0;
+            for (int c = 0; c < cols-1; c++) {
+            	for (int r = 0; r < rows; r++) {
+                
+                    if (dp[r][c] > Integer.MIN_VALUE) {
+                        switch (r) {
+                            case 0: // buy -> sell or cool
+                                dp[1][c+1] = Math.max(dp[1][c+1], dp[r][c] + prices[c]);
+                                dp[2][c+1] = Math.max(dp[2][c+1], dp[r][c]);
+                                break;
+                            case 1: // sell -> cool
+                                dp[3][c+1] = Math.max(dp[3][c+1], dp[r][c]);
+                                break;
+                            case 2: // cool bought -> cool or buy
+                                dp[2][c+1] = Math.max(dp[2][c+1], dp[r][c]);
+                                dp[0][c+1] = Math.max(dp[0][c+1], dp[r][c] - prices[c]);
+                                break;
+                            default:    // cool sold -> cool sold or buy
+                                dp[3][c+1] = Math.max(dp[3][c+1], dp[r][c]);
+                                dp[0][c+1] = Math.max(dp[0][c+1], dp[r][c] - prices[c]);
+                                break;
+                        }
+                    }
+                }
+            }
+            int max = 0;
+            for (int r = 0; r < rows; r++) {
+                max = Math.max(max, dp[r][cols-1]);
+            }
+            return max;
+        }
+    }
 
     
     static class SolutionI extends BestTimeToBuyAndSellStockWithCooldown {

@@ -1,5 +1,6 @@
 package com.leetcode.util;
 
+import java.util.Arrays;
 
 public class ArrayUtil {
 	
@@ -20,28 +21,14 @@ public class ArrayUtil {
 		System.out.println();
 	}
 	
-	public static void printMatrix(int[] array) {
-		
+	public static void printMatrix(int[][] array) {
+		for (int[] row : array)
+			System.out.println(Arrays.toString(row));
 	}
 	
-	public static void printMatrix(int[][] array) {
-		int dim1 = array.length;
-		int dim2 = array[0].length;
-		
-		System.out.print("[");
-		for (int i = 0; i < dim1; i++) {
-			System.out.print("[");
-			for (int j = 0; j < dim2; j++) {
-				System.out.print(array[i][j]);
-				if (j < dim2 - 1)
-					System.out.print(",");
-			}
-			System.out.print("]");
-			if (i < dim1 - 1)
-				System.out.print(",");
-		}
-		System.out.print("]");
-		System.out.println();
+	public static void printMatrix(char[][] array) {
+		for (char[] row : array)
+			System.out.println(Arrays.toString(row));
 	}
 	
 	public static int[] str2intArray(String s) {
