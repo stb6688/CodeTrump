@@ -1,20 +1,19 @@
 package com.leetcode.oj;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.leetcode.util.ArrayUtil;
-import com.leetcode.util.LeetcodeUtils;
 
 public abstract class PalindromePairs {
 	
 	public abstract List<List<Integer>> palindromePairs(String[] words);
     public static void main(String[] args) {
-    	PalindromePairs instance = new SolutionIII();
+    	PalindromePairs instance = new SolutionIV();
     	String[] words;
     	long t1, t2;
     	List<List<Integer>> results;
@@ -23,7 +22,7 @@ public abstract class PalindromePairs {
 //    	words = new String[]{"bat", "tab", "cat"};
     	
 //    	[[0,1],[1,0]]
-    	words = new String[]{"a", ""};
+//    	words = new String[]{"a", ""};
     	
     	// [[0, 1], [1, 0], [3, 2], [2, 4]]
 //    	words = new String[]{"abcd", "dcba", "lls", "s", "sssll"};
@@ -35,9 +34,9 @@ public abstract class PalindromePairs {
 //    	System.out.println("results=" + results);
     	
     	// [[0,1],[1,0],[2,1],[2,3],[0,3],[3,2]]
-    	words = new String[]{"ab","ba","abc","cba"};
-    	results = instance.palindromePairs(words);
-    	System.out.println("results=" + results);
+//    	words = new String[]{"ab","ba","abc","cba"};
+//    	results = instance.palindromePairs(words);
+//    	System.out.println("results=" + results);
     	
     	// [0,1], [1,0]
 //    	words = new String[]{"bat", "tab", "cat"};
@@ -50,7 +49,82 @@ public abstract class PalindromePairs {
 //    	results = instance.palindromePairs(words);
 //    	t2 = System.currentTimeMillis();
 //    	System.out.println(String.format("results=%s, total time=%,dms", results, (t2 - t1)));
+    	
+    	words = new String[]{"a","aa","aaa"};
+    	results = instance.palindromePairs(words);
+    	System.out.println("results=" + results);
 	}
+    
+    
+    static class SolutionIV extends PalindromePairs {
+    	public List<List<Integer>> palindromePairs(String[] words) {
+            Map<String, Integer> strIdx = new HashMap<>();
+            Set<List<Integer>> results = new HashSet<>();
+            for (int i = 0; i < words.length; strIdx.put(words[i], i), i++);
+            for (int i = 0; i < words.length; i++) {
+                getPair(words, i, strIdx, results);
+            }
+            return new ArrayList<>(results);
+        }
+        
+        private void getPair(String[] words, int idx, Map<String, Integer> strIdx, Set<List<Integer>> results) {
+            String w = words[idx];
+if (w.equals("aaa"))
+	System.out.println();
+            // with pivot
+            for (int m = 0; m < w.length(); m++) {
+                int l = m-1, r = m+1;
+                while (l >= 0 && r < w.length()) {
+                    if (w.charAt(l) != w.charAt(r))
+                        break;
+                    l--;
+                    r++;
+                }
+                addResult(w, l, r, idx, strIdx, results);
+            }
+            // without pivot
+            for (int m = 0; m <= w.length(); m++) {
+                int r = m, l = r-1;
+                while (l >= 0 && r < w.length()) {
+                    if (w.charAt(l) != w.charAt(r))
+                        break;
+                    l--;
+                    r++;
+                }
+                addResult(w, l, r, idx, strIdx, results);
+            }
+        }
+        
+        // always look for left pair; if B is A's right pair, then A must be B's left pair -> return 1 [A,B]
+        private void addResult(String s, int l, int r, int idx, Map<String, Integer> strIdx, Set<List<Integer>> results) {
+System.out.println("l=" + l + ", r=" + r);
+            StringBuilder builder = new StringBuilder();
+            if (l < 0) { // need to add a left pair to match remaining on right
+            	int rr = r;
+                while (rr < s.length()) {
+                    builder.insert(0, s.charAt(rr++));
+                }
+                Integer lidx = strIdx.get(builder.toString());
+                if (lidx != null && lidx != idx) {
+if (lidx == 4 && idx == 2)
+	System.out.println();
+                    results.add(Arrays.asList(lidx, idx));
+                }
+            } 
+            if (r >= s.length()) { // need to add a right pair to match remaining on left
+                while (l >= 0)
+                    builder.append(s.charAt(l--));
+                Integer ridx = strIdx.get(builder.toString());
+                if (ridx != null && idx != ridx) {
+if (idx == 4 && ridx == 2)
+	System.out.println();
+                    results.add(Arrays.asList(idx, ridx));
+                }
+            }
+        }
+    }
+    
+    
     
     static class SolutionIII extends PalindromePairs {
     	public List<List<Integer>> palindromePairs(String[] words) {
@@ -61,15 +135,6 @@ public abstract class PalindromePairs {
                 if (visited.add(words[i]))
                     addPairs(words[i], i, leftIndices, rightIndices);
             }
-for (Map.Entry<String, List<Integer>> entry : leftIndices.entrySet()) {
-	for (int i : entry.getValue())
-		System.out.println("left=" + entry.getKey() + ", right=" + words[i]);
-}
-System.out.println("------------");
-for (Map.Entry<String, List<Integer>> entry : rightIndices.entrySet()) {
-	for (int i : entry.getValue())
-		System.out.println("left=" + words[i] + ", right=" + entry.getKey());
-}
             List<List<Integer>> results = new ArrayList<>();
             List<Integer> indices;
             for (int i = 0; i < words.length; i++) {
