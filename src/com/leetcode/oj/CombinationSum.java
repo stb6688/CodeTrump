@@ -9,19 +9,61 @@ import java.util.Map;
 public abstract class CombinationSum {
 	public abstract List<List<Integer>> combinationSum(int[] candidates, int target);
 	public static void main(String[] args) {
-		CombinationSum instance = new SolutionII();
+		CombinationSum instance = new SolutionIII();
 		int[] candidates; int target;
 		List<List<Integer>> results;
 		
 //		candidates = new int[]{2, 3, 6, 7};
 //		target = 7;
-//		results = instance.combinationSum(candidates, target);
-//		System.out.println("results=" + results);
+		
+//		candidates = new int[]{1, 2};
+//		target = 4;
+		
+		// [[1,1,1],[1,2]]
+//		candidates = new int[]{1, 2};
+//		target = 3;
 		
 		candidates = new int[]{1, 2};
-		target = 4;
+		target = 3;
+		
 		results = instance.combinationSum(candidates, target);
 		System.out.println("results=" + results);
+	}
+	
+	
+	static class SolutionIII extends CombinationSum {
+		public List<List<Integer>> combinationSum(int[] candidates, int target) {
+	        Arrays.sort(candidates);
+	        return recurse(candidates, 0, target);
+	    }
+	    
+	    private Map<Integer, List<List<Integer>>> cache = new HashMap<>();
+	    private List<List<Integer>> recurse(int[] candidates, int start, int target) {
+System.out.println("target=" + target + ", start=" + start);
+	        List<List<Integer>> results = cache.get(target);
+	        if (results != null)
+	            return results;
+	        results = new ArrayList<>();
+	        if (start < candidates.length && target >= candidates[start]) { // termination
+	            for (int i = start; i < candidates.length; i++) {
+	                int cand = candidates[i];
+	                int remain = target - cand;
+	                if (remain == 0) { // termination
+	                    results.add(Arrays.asList(cand));
+	                } else {
+	                    List<List<Integer>> subResults = recurse(candidates, i, remain);
+	                    for (List<Integer> subResult : subResults) {
+	                        List<Integer> result = new ArrayList<>();
+	                        result.add(cand);
+	                        result.addAll(subResult);
+	                        results.add(result);
+	                    }
+	                }
+	            }
+	        }
+//	        cache.put(target, results);
+	        return results;
+	    }
 	}
 	
 	static class SolutionII extends CombinationSum {
