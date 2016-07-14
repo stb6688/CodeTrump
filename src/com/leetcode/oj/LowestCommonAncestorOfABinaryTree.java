@@ -11,7 +11,7 @@ import com.leetcode.util.TreeNode;
 public abstract class LowestCommonAncestorOfABinaryTree {
 	public abstract TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q);
 	public static void main(String[] args) {
-		LowestCommonAncestorOfABinaryTree instance = new SolutionIV();
+		LowestCommonAncestorOfABinaryTree instance = new SolutionV();
 		TreeNode root, p, q;
 		
 		// 1
@@ -25,13 +25,52 @@ public abstract class LowestCommonAncestorOfABinaryTree {
 //		q = new TreeNode(1);
 		
 		
-		root = TreeNode.deserialize("[37,-34,-48,null,-100,-100,48,null,null,null,null,-54,null,-71,-22,null,null,null,8]");
-		System.out.println(TreeNode.serialize(root));
-		p = new TreeNode(-100);
-		q = new TreeNode(-71);
+//		root = TreeNode.deserialize("[37,-34,-48,null,-100,-100,48,null,null,null,null,-54,null,-71,-22,null,null,null,8]");
+//		p = new TreeNode(-100);
+//		q = new TreeNode(-71);
+		
+		
+		root = TreeNode.deserialize("[1,2,3,null,4]");
+		p = root.left.right;	// 4
+		q = root.right;	// 3
 		
 		TreeNode result = instance.lowestCommonAncestor(root, p, q);
 		System.out.println("result=" + result);
+	}
+	
+	
+	// Solution V: Logic Error
+	static class SolutionV extends LowestCommonAncestorOfABinaryTree {
+		public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+	        Stack<TreeNode> s = new Stack<>();
+	        int found = 0;
+	        Stack<TreeNode> stack = new Stack<>();
+	        while (root != null || !stack.isEmpty()) {
+	            while (root != null) {
+	                if (found == 0)
+	                    s.push(root);
+	                if (root == p || root == q) {
+	                    if (++found == 2)
+	                        return s.peek();
+	                }
+	                stack.push(root);
+	                root = root.left;
+	            }
+	            while (!stack.isEmpty()) {
+	                TreeNode pop = stack.pop();
+	                if (found == 1 && pop == s.peek()) {
+	                    TreeNode last = s.pop();
+	                    if (s.isEmpty())
+	                        return last;
+	                }
+	                if (pop.right != null) {
+	                    root = pop.right;
+	                    break;
+	                }
+	            }
+	        }
+	        return null;    // unreachable
+	    }
 	}
 	
 	

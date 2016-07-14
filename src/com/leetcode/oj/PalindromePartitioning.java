@@ -3,25 +3,62 @@ package com.leetcode.oj;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 public abstract class PalindromePartitioning {
 	public abstract List<List<String>> partition(String s);
 	public static void main(String[] args) {
-    	PalindromePartitioning instance = new SolutionIV();
+    	PalindromePartitioning instance = new SolutionV();
     	String s;
     	
     	// [["a","a","b"],["aa","b"]]
-//    	s = "aab";
+    	s = "aab";
     	
-    	s = "ab";
+//    	s = "ab";
+    	
+    	s = "aabbccdd";
     	
     	long t1 = System.currentTimeMillis();
     	List<List<String>> results = instance.partition(s);
     	long t2 = System.currentTimeMillis();
     	System.out.println("results=" + results);
     	System.out.println(String.format("total time=%,dms", (t2 - t1)));
+	}
+	
+	
+	// Solution V: 
+	// use backtracking.
+	static class SolutionV extends PalindromePartitioning {
+		public List<List<String>> partition(String s) {
+	        List<List<String>> results = new LinkedList<>();
+	        List<String> list = new LinkedList<>();
+	        bt(s, 0, list, results);
+	        return results;
+	    }
+	    
+	    private void bt(String s, int l, List<String> list, List<List<String>> results) {
+	        if (l == s.length())
+	            results.add(new LinkedList<>(list));
+	        else {
+	            for (int r = l; r < s.length(); r++) {
+	                if (isPalindrome(s, l, r)) {
+	                    list.add(s.substring(l, r+1));  // modify
+	                    bt(s, r+1, list, results);
+	                    list.remove(list.size()-1); // restore
+	                }
+	            }
+	        }
+	    }
+	    
+	    private boolean isPalindrome(String s, int l, int r) {
+	        while (l < r) {
+	            if (s.charAt(l++) != s.charAt(r--))
+	                return false;
+	        }
+	        return true;
+	    }
 	}
 	
 	

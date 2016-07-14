@@ -58,15 +58,7 @@ public class ListNode {
 	}
 	
 	public void print() {
-		ListNode node = this;
-		StringBuilder builder = new StringBuilder();
-		builder.append(node.val);
-		node = node.next;
-		while (node != null) {
-			builder.append(",").append(node.val);
-			node = node.next;
-		}
-		System.out.println(builder);
+		System.out.println(serialize(this));
 	}
 	
 	public static ListNode arrayToListNode(int[] array) {
@@ -81,6 +73,36 @@ public class ListNode {
 			else
 				prev.next = node;
 			prev = node;
+		}
+		
+		return head;
+	}
+	
+	
+	public static String serialize(ListNode head) {
+		StringBuilder b = new StringBuilder();
+		while (head != null) {
+			if (b.length() > 0)
+				b.append(",");
+			b.append(head.val);
+			head = head.next;
+		}
+		return b.toString();
+	}
+	
+	public static ListNode deserialize(String s) {
+		s = s.trim();
+		if (s.charAt(0) == '[')
+			s = s.substring(1, s.length()-1);
+		String[] strs = s.split(",");
+		ListNode head = null, prev = null, curr = null;
+		for (int i = 0; i < strs.length; i++) {
+			curr = new ListNode(Integer.valueOf(strs[i]));
+			if (head == null)
+				head = curr;
+			if (prev != null)
+				prev.next = curr;
+			prev = curr;
 		}
 		
 		return head;

@@ -3,9 +3,14 @@ package com.leetcode.oj;
 public abstract class MedianOfTwoSortedArrays {
 	public abstract double findMedianSortedArrays(int[] nums1, int[] nums2);
 	public static void main(String[] args) {
-		MedianOfTwoSortedArrays instance = new SolutionI();
+		MedianOfTwoSortedArrays instance = new SolutionII();
 		int[] nums1, nums2;
 		double result;
+		
+		// 2.0
+//		nums1 = new int[]{1,2}; nums2 = new int[]{3};
+		
+		nums1 = new int[]{1}; nums2 = new int[]{1};
 		
 		// 2.0
 //		nums1 = new int[]{1,3}; nums2 = new int[]{2};
@@ -25,10 +30,58 @@ public abstract class MedianOfTwoSortedArrays {
 //		nums1 = new int[]{1}; nums2 = new int[]{1};
 		
 		// 2.0
-		nums1 = new int[]{1,2,2}; nums2 = new int[]{1,2,3};
+//		nums1 = new int[]{1,2,2}; nums2 = new int[]{1,2,3};
 		
 		result = instance.findMedianSortedArrays(nums1, nums2);
 		System.out.println("result=" + result);
+	}
+	
+	
+	static class SolutionII extends MedianOfTwoSortedArrays {
+		public double findMedianSortedArrays(int[] nums1, int[] nums2) {
+	        int len = nums1.length + nums2.length;
+	        if (len % 2 == 1)
+	            return findkth(nums1, nums2, len/2);
+	        else
+	            return(findkth(nums1, nums2, len/2-1) + findkth(nums1, nums2, len/2))/2.0;
+	    }
+	    
+	    private int findkth(int[] nums1, int[] nums2, int k) {
+	        int idx1 = binary(nums1, 0, nums1.length-1, nums2, k);
+	        if (idx1 >= 0)
+	            return nums1[idx1];
+	        int idx2 = binary(nums2, 0, nums2.length-1, nums1, k);
+	        return nums2[idx2];
+	    }
+	    
+	    private int binary(int[] nums1, int l, int r, int[] nums2, int k) {
+	        if (l > r)
+	            return -1;
+	        int m = (l + r)/2;
+	        int count1 = m;
+	        int count2 = countLess(nums2, 0, nums2.length-1, nums1[m]); // number of elements < nums1[m]
+	        if (count1+count2 == k)
+	            return m;
+	        else if (count1+count2 < k)
+	            return binary(nums1, m+1, r, nums2, k);
+	        else
+	            return binary(nums1, l, m-1, nums2, k);
+	    }
+	    
+	    // find idx of first element >= target;
+	    // that is, find number of elements < target
+	    private int countLess(int[] nums, int l, int r, int target) {
+System.out.println("l=" + l + ", r=" + r + ", target=" + target);
+	        if (nums.length == 0 || target > nums[r])
+	            return r+1;
+	        int m = (l + r)/2;
+	        if (nums[m] >= target && (m-1 < l || nums[m-1] < target))
+	            return m;
+	        else if (m-1 >= l && nums[m-1] >= target)
+	            return countLess(nums, l, m-1, target);
+	        else
+	            return countLess(nums, m+1, r, target);
+	    }
 	}
 	
 	

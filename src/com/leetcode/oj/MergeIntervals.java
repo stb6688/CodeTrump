@@ -1,7 +1,9 @@
 package com.leetcode.oj;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
 
@@ -10,15 +12,60 @@ import com.leetcode.util.Interval;
 public abstract class MergeIntervals {
 	public abstract List<Interval> merge(List<Interval> intervals);
 	public static void main(String[] args) {
-		MergeIntervals instance = new SolutionI();
+		MergeIntervals instance = new SolutionII();
 		List<Interval> intervals = new ArrayList<>();
 		List<Interval> results;
 		
-		intervals.add(new Interval(133, 138));
-		intervals.add(new Interval(131, 133));
-		intervals.add(new Interval(137, 137));
+//		intervals.add(new Interval(133, 138));
+//		intervals.add(new Interval(131, 133));
+//		intervals.add(new Interval(137, 137));
+		
+		intervals.add(new Interval(1, 4));
+		intervals.add(new Interval(4, 5));
+		
 		results = instance.merge(intervals);
 		System.out.println("results=" + results);
+	}
+	
+	static class SolutionII extends MergeIntervals {
+		public List<Interval> merge(List<Interval> intervals) {
+	        PriorityQueue<int[]> q = new PriorityQueue<>(new Comparator<int[]>(){
+	            @Override
+	            public int compare(int[] a1, int[] a2) {
+	                return a1[0] - a2[0];
+	            }
+	        });
+	        for (Interval interval : intervals) {
+	            q.add(new int[]{interval.start, 0});
+	            q.add(new int[]{interval.end, 1});
+	        }
+	        List<Interval> rets = new LinkedList<>();
+	        int count = 0, start = -1;
+	        boolean gap = true;
+	        while (!q.isEmpty()) {
+	            int[] top = q.peek();
+	            int x = top[0];
+	            while (!q.isEmpty() && q.peek()[0] == x) {
+	                top = q.poll();
+System.out.println(Arrays.toString(top));
+					int id = top[1];
+	                if (id == 0)
+	                    count++;
+	                else
+	                    count--;
+	            }
+System.out.println("x=" + x + ", count=" + count);
+	            if (gap) {
+	                start = x;
+	                gap = false;
+	            } else if (count == 0) { // end of an interval
+	                int end = x;
+	                rets.add(new Interval(start, end));
+	                gap = true;
+	            }
+	        }
+	        return rets;
+	    }
 	}
 	
 	static class SolutionI extends MergeIntervals {

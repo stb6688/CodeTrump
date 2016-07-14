@@ -9,13 +9,14 @@ import com.leetcode.util.TreeNode;
 public abstract class CountCompleteTreeNodes {
 	public abstract int countNodes(TreeNode root);
 	public static void main(String[] args) {
-    	CountCompleteTreeNodes instance = new SolutionV();
+    	CountCompleteTreeNodes instance = new SolutionVII();
     	TreeNode root;
     	int result;
     	long t1, t2;
 
 //    	root = TreeNode.deserialize("1"); // 1
-//    	root = TreeNode.deserialize("1,2"); // 1
+//    	root = TreeNode.deserialize("1,2,3"); // 3
+//    	root = TreeNode.deserialize("1,2"); // 2
 //    	root = TreeNode.deserialize("1,2,3,4,5,6,7"); // 7
 //    	root = TreeNode.deserialize("1,2,3,4"); // 4
 //    	root = TreeNode.deserialize("1,2,3,4,5"); // 5
@@ -33,6 +34,52 @@ public abstract class CountCompleteTreeNodes {
 	}
 	
 	
+	// Solution VII: TLE
+	// Reason solution VI works is that if we have a huge tree which is perfect,
+	// solution VI will detect it's perfect and simply stop iterating the nodes.
+	// but this is really just a special case, in my opinion.
+	// and many accepted C++ solutions just traverse through the entire tree without
+	// any optimization...
+	static class SolutionVII extends CountCompleteTreeNodes {
+		public int countNodes(TreeNode root) {
+	        if (root == null)
+	            return 0;
+	            
+	        int maxH = 0;
+	        TreeNode node = root;
+	        while (node != null) {
+	            maxH++;
+	            node = node.left;
+	        }
+	        // now, count leaves whose h==maxH; stop at first leaf whose height < maxH.
+	        int[] comp = {0}; // convert to reference
+	        count(root, 0, maxH, comp);
+	        int  res = (1 << (maxH-1)) - 1 + comp[0];
+	        return res;
+	    }
+	    
+	    // return false if we encounter the incomplete leaf; we should then stop recursion.
+	    // node is not null.
+	    private boolean count(TreeNode node, int h, int maxH, int[] comp) {
+	        h++;
+	        if (node.right == null) {
+	            if (h == maxH) {
+	                comp[0]++;
+	                return true;
+	            } else
+	                return false;
+	        } else if (node.right == null) {
+	            // node has only left child; left child must be a complete leaf, and we can stop here.
+	            comp[0]++;
+	            return false;
+	        } else {
+	            return count(node.left, h, maxH, comp) && count(node.right, h, maxH, comp);
+	        }
+	    }
+	}
+	
+	
+	// Solutoin VI: Accepted
 	static class SolutionVI extends CountCompleteTreeNodes {
 		public int countNodes(TreeNode root) {
 	        int leftDepth = leftDepth(root);

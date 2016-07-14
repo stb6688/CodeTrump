@@ -13,9 +13,7 @@ import com.leetcode.util.annotations.Leetcode.Tags;
 @Leetcode(date="2016-06-01", tags={Tags.TREE, Tags.POSTORDER}, 
 	url="https://leetcode.com/problems/binary-tree-postorder-traversal/")
 public abstract class BinaryTreePostorderTraversal {
-
 	public abstract List<Integer> postorderTraversal(TreeNode root);
-	
 	public static void main(String[] args) {
 		BinaryTreePostorderTraversal instance = new Solution();
 		TreeNode root;

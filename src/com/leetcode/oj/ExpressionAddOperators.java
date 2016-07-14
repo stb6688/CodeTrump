@@ -7,21 +7,24 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Stack;
 
 public abstract class ExpressionAddOperators {
 	public abstract List<String> addOperators(String num, int target);
 	
 	public static void main(String[] args) {
-		ExpressionAddOperators instance = new SolutionIV();
+		ExpressionAddOperators instance = new SolutionV();
 		String num; int target;
 		List<String> results;
 		
+//		num = "123"; target = 6;
+		
 		// 2*3+2, 2+2*3
-//		num = "232"; target = 8;
+		num = "232"; target = 8;
 		
 		// 1*0 + 5, 10-5
-		num = "2147483648"; target = -2147483648;
+//		num = "2147483648"; target = -2147483648;
 		
 		// 10+5, 1+0+5
 //		num = "105"; target = 5;
@@ -29,6 +32,74 @@ public abstract class ExpressionAddOperators {
 		
 		results = instance.addOperators(num, target);
 		System.out.println("results=" + results);
+	}
+	
+	
+	static class SolutionV extends ExpressionAddOperators {
+		public List<String> addOperators(String num, int target) {
+	        if (num.isEmpty())
+	            return Collections.emptyList();
+	        List<String> list = new LinkedList<>();
+	        List<String> rets = new LinkedList<>();
+	        bt(list, num, 0, rets, target);
+	        return rets;
+	    }
+	    
+	    private static final String[] ops = {"+", "-", "*"};
+	    private void bt(List<String> list, String num, int l, List<String> rets, int target) {
+	        if (l == num.length()) {
+	            if (eval(list) == target) {
+	                StringBuilder b = new StringBuilder();
+	                for (String s : list)
+	                    b.append(s);
+	                rets.add(b.toString());
+	            }
+	        } else {
+	            for (int r = l+1; r <= num.length(); r++) {
+	                String next = num.substring(l, r);
+	                if (Long.valueOf(next) > Integer.MAX_VALUE)
+	                    break;
+	                if (list.isEmpty()) { // ERROR: special case
+	                    list.add(next); // modify
+	                    bt(list, num, r, rets, target);
+	                    list.remove(list.size()-1); // restore
+	                } else {
+	                    for (String op : ops) {
+	                        list.add(op);
+	                        list.add(next);  // modify
+	                        bt(list, num, r, rets, target);
+	                        // list = list.subList(0, list.size()-2);
+	                        list.remove(list.size()-1);
+	                        list.remove(list.size()-1); // restore
+	                    }
+	                }
+	                if (num.charAt(l) == '0')
+	                    break;
+	            }
+	        }
+	    }
+	    
+	    private int eval(List<String> list) {
+System.out.println("list=" + list);
+	        String op = null;
+	        Queue<Integer> q = new LinkedList<>();
+	        for (String s : list) {
+	            char ch = s.charAt(0);
+	            if (ch >= '0' && ch <= '9') {
+	                if (op == null || op.equals("+"))
+	                    q.add(Integer.valueOf(s));
+	                else if (op.equals("-"))
+	                    q.add(-Integer.valueOf(s));
+	                else
+	                    q.add(q.remove()*Integer.valueOf(s));
+	            } else 
+	                op = s;
+	        }
+	        int ret = 0;
+	        for (Integer num : q)
+	            ret += num;
+	        return ret;
+	    }
 	}
 	
 	
