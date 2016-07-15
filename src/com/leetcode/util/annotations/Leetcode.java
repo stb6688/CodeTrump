@@ -15,6 +15,7 @@ public @interface Leetcode {
 		BFS,
 		DFS,
 		BST,
+		GRAPH,
 		PREORDER,
 		POSTORDER,
 		INORDER,

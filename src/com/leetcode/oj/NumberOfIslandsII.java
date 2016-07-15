@@ -3,6 +3,7 @@ package com.leetcode.oj;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -12,7 +13,7 @@ import com.leetcode.util.ArrayUtil;
 public abstract class NumberOfIslandsII {
 	public abstract List<Integer> numIslands2(int m, int n, int[][] positions);
 	public static void main(String[] args) {
-		NumberOfIslandsII instance = new SolutionIV();
+		NumberOfIslandsII instance = new SolutionV();
 		int m, n; int[][] positions;
 		List<Integer> results;
 		
@@ -34,6 +35,53 @@ public abstract class NumberOfIslandsII {
 	
 		results = instance.numIslands2(m, n, positions);
 		System.out.println("results=" + results);
+	}
+	
+	
+	static class SolutionV extends NumberOfIslandsII {
+		private static final int[][] dirs = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+	    public List<Integer> numIslands2(int m, int n, int[][] positions) {
+	        List<Integer> rets = new LinkedList<>();
+	        int id = 1, count = 0;
+	        int[][] table = new int[m][n];
+	        for (int[] p : positions) {
+	            int r = p[0], c = p[1];
+	            Integer nbId = null;
+	            for (int[] dir : dirs) {
+	                int r1 = r + dir[0], c1 = c + dir[1];
+	                if (r1 >= 0 && r1 < m && c1 >= 0 && c1 < n) {
+	                    if (table[r1][c1] > 0) {
+	                        if (nbId == null) {
+	                            nbId = table[r1][c1];
+	                            table[r][c] = nbId;
+	                        } else if (table[r1][c1] != nbId){
+	                            flip(table, r1, c1, nbId);
+	                            count--;
+	                        }
+	                    }
+	                }
+	            }
+	            if (nbId == null) {
+	                table[r][c] = id++;
+	                count++;
+	            }
+	            rets.add(count);
+	        }
+	        
+	        return rets;
+	    }
+	    
+	    private void flip(int[][] table, int r, int c, int id) {
+System.out.println("flip r=" + r + ", c=" + c + ", old=" + table[r][c] + ", new id=" + id);
+	        int old = table[r][c];
+	        table[r][c] = id;
+	        for (int[] dir : dirs) {
+	            int r1 = r + dir[0], c1 = c + dir[1];
+	            if (r1 >= 0 && r1 < table.length && c1 >= 0 && c1 < table[0].length && table[r1][c1] == old) {
+	                flip(table, r1, c1, id);
+	            }
+	        }
+	    }
 	}
 	
 	
