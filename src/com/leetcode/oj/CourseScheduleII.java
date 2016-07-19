@@ -14,15 +14,58 @@ import com.leetcode.util.ArrayUtil;
 public abstract class CourseScheduleII {
 	public abstract int[] findOrder(int numCourses, int[][] prerequisites);
 	public static void main(String[] args) {
-    	CourseScheduleII instance = new SolutionII();
+    	CourseScheduleII instance = new SolutionIII();
     	int numCourses;
     	int[][] prerequisites;
     	
+//    	numCourses = 2;
+//    	prerequisites = ArrayUtil.str2int2DArray("[[1,0]]");
+    	
+//    	numCourses = 4;
+//    	prerequisites = ArrayUtil.str2int2DArray("[[0,1],[3,1],[1,3],[3,2]]");
+    	
     	numCourses = 2;
-    	prerequisites = ArrayUtil.str2int2DArray("[[1,0]]");
+    	prerequisites = ArrayUtil.str2int2DArray("[[1,0], [0,1]]");
     	
     	int[] results = instance.findOrder(numCourses, prerequisites);
     	System.out.println("results=" + Arrays.toString(results));
+	}
+	
+	
+	static class SolutionIII extends CourseScheduleII {
+		public int[] findOrder(int numCourses, int[][] prerequisites) {
+	        int[] rets = new int[numCourses];
+	        int[] status = new int[numCourses];
+	        List<List<Integer>> cPres = new ArrayList<>();
+	        for (int i = 0; i < numCourses; i++)
+	            cPres.add(new LinkedList<>());
+	        for (int[] p : prerequisites)
+	            cPres.get(p[0]).add(p[1]);
+	        int idx = 0;
+	        for (int c = 0; c < numCourses; c++)
+	            idx = dfs(c, idx, rets, status, cPres);
+	        return rets;
+	    }
+	    
+	    // return next idx to fill
+	    private int dfs(int c, int idx, int[] rets, int[] status, List<List<Integer>> cPres) {
+System.out.println("c=" + c + ", idx=" + idx + ", status=" + Arrays.toString(status));
+	        if (status[c] == 2)
+	            return idx;
+	        if (status[c] == 1) // loop
+	            return -1;
+	        status[c] = 1;
+	        List<Integer> pres = cPres.get(c);
+	        for (int pre : pres) {
+	            idx = dfs(pre, idx, rets, status, cPres);
+	            if (idx < 0)
+	                return -1;
+	        }
+	        rets[idx++] = c;
+	        status[c] = 2;
+	        
+	        return idx;
+	    }
 	}
 	
 	

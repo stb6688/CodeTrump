@@ -1,18 +1,21 @@
 package com.leetcode.oj;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Set;
 
 public abstract class ReconstructItinerary {
 	public abstract List<String> findItinerary(String[][] tickets);
 	public static void main(String[] args) {
-		ReconstructItinerary instance = new SolutionIV();
+		ReconstructItinerary instance = new SolutionV();
 		String[][] tickets;
 		List<String> results;
 		
@@ -29,6 +32,64 @@ public abstract class ReconstructItinerary {
 	}
 	
 	
+	// Solution V: Accepted
+	// backtracking; change from solution VI: track number of edges used using a set.
+	static class SolutionV extends ReconstructItinerary {
+		public List<String> findItinerary(String[][] tickets) {
+	        Map<String, List<String>> srcDests = new HashMap<>();
+	        Map<List<String>, Integer> edgeCount = new HashMap<>();
+	        for (String[] t : tickets) {
+	            String src = t[0], dest = t[1];
+	            List<String> dests = srcDests.get(src);
+	            if (dests == null) {
+	                dests = new LinkedList<>();
+	                srcDests.put(src, dests);
+	            }
+	            dests.add(dest);
+	            List<String> edge = Arrays.asList(src, dest);
+	            Integer count = edgeCount.get(edge);
+	            if (count == null)
+	                count = 0;
+	            edgeCount.put(edge, count+1);
+	        }
+	        for (Map.Entry<String, List<String>> entry : srcDests.entrySet())
+	            Collections.sort(entry.getValue());
+	        List<String> rets = new LinkedList<>();
+	        rets.add("JFK");
+	        dfs(rets, srcDests, edgeCount, tickets.length+1);
+	        
+	        return rets;
+	    }
+	    
+	    private boolean dfs(List<String> rets, Map<String, List<String>> srcDests, Map<List<String>, Integer> edgeCount, int len) {
+	        if (rets.size() == len)
+	            return true;
+	        String src = rets.get(rets.size()-1);
+	        List<String> dests = srcDests.get(src);
+	        if (dests != null) {
+	            for (String dest : dests) {
+	                List<String> edge = Arrays.asList(src, dest);
+	                Integer count = edgeCount.get(edge);
+	                if (count > 0) {
+	                    edgeCount.put(edge, count-1); // modify
+	                    rets.add(dest); // modify
+	                    if (dfs(rets, srcDests, edgeCount, len))
+	                        return true; // greedy return
+	                    edgeCount.put(edge, count); // restore
+	                    rets.remove(rets.size()-1); // restore
+	                }
+	            }
+	        }
+	        
+	        return false;
+	    }
+	}
+	
+	
+	// Solution III: Accepted 
+	// dfs with backtracking
+    // for each vertex, its neighbors are sorted and we shall try each neighbor in sequence;
+	// the logic to pick a neighbor and backtrack is not efficient (or maybe wrong).
 	static class SolutionIV extends ReconstructItinerary {
 		public List<String> findItinerary(String[][] tickets) {
 	        Map<String, List<String>> nodeNbs = new HashMap<>();
@@ -57,10 +118,10 @@ public abstract class ReconstructItinerary {
 	        List<String> nbs = nodeNbs.get(node);
 	        if (nbs == null)
 	            return false;
-	        List<String> copy = new LinkedList<>(nbs);
+	        List<String> copy = new LinkedList<>(nbs); // NOTE: create a copy of list, unfortunately
 	        for (String nb : copy) {
 	            result.add(nb); // modify
-	            nbs.remove(nb); // modify
+	            nbs.remove(nb); // modify   // NOTE: removing from linkedlist takes O(n); tradeoff
 	            if (nbs.isEmpty())
 	                nodeNbs.remove(node);
 	            if (bt(nb, nodeNbs, result))
@@ -75,60 +136,140 @@ public abstract class ReconstructItinerary {
 	}
 	
 	
+	// Solution II: TLE
 	static class SolutionIII extends ReconstructItinerary {
 		public List<String> findItinerary(String[][] tickets) {
-	        List<StringBuilder> paths = new ArrayList<>();
-	        Map<String, Set<String>> nodeNbs = new HashMap<>();
+	        List<List<String>> results = new ArrayList<>();
+	        Map<String, List<String>> nodeNbs = new HashMap<>();
 	        for (String[] ticket : tickets) {
-	            add(nodeNbs, ticket[0], ticket[1]);
+	            String node = ticket[0], nb = ticket[1];
+	            add(node, nb, nodeNbs);
 	        }
-	        StringBuilder path = new StringBuilder("JFK");
-	        dfs("JFK", nodeNbs, path, paths);
-	        List<String> strs = new ArrayList<>();
-	        for (StringBuilder p : paths)
-	            strs.add(p.toString());
-	        Collections.sort(strs);
-	        String s = strs.get(0);
-	        List<String> results = new ArrayList<>();
-	        while (!s.isEmpty()) {
-	            results.add(s.substring(0, 3));
-	            s = s.substring(3, s.length());
-	        }
-	        return results;
-	    }
-	    
-	    private void dfs(String node, Map<String, Set<String>> nodeNbs, StringBuilder path, List<StringBuilder> paths) {
-//if (path.toString().equals("JFKATLJFKSFO"))
-if (path.toString().equals("JFKATLJFK"))
-	System.out.println();
-	        // termination
-	        if (nodeNbs.isEmpty())
-	            paths.add(new StringBuilder(path)); // ERROR: create a copy as path is shared
-	        Set<String> nbs = nodeNbs.get(node);
-	        if (nbs != null) { // termination
-	            Set<String> copy = new HashSet<>(nbs);
-	            for (String nb : copy) {
-	                nbs.remove(nb); // modify
-	                if (nbs.isEmpty()) {
-if (node.equals("ATL"))
-	System.out.println();
-	                    nodeNbs.remove(node);
+	        
+	        List<List<String>> paths = new ArrayList<>();
+	        List<String> path0 = new ArrayList<>();
+	        path0.add("JFK");
+	        paths.add(path0);
+	        List<Set<String>> visitedList = new ArrayList<>();
+	        Set<String> visited0 = new HashSet<>();
+	        visited0.add("JFK");
+	        visitedList.add(visited0);
+	        while (!paths.isEmpty()) {
+	            List<List<String>> nextPaths = new ArrayList<>();
+	            List<Set<String>> nextVisitedList = new ArrayList<>();
+	            for (int i = 0; i < paths.size(); i++) {
+	                List<String> path = paths.get(i);
+	                Set<String> visited = visitedList.get(i);
+	                String last = path.get(path.size() - 1);
+	                List<String> nbs = nodeNbs.get(last);
+	                if (nbs != null) {
+	                    for (String nb : nbs) {
+	                        if (!visited.contains(nb)) {
+	                            List<String> nextPath = new ArrayList<>(path);
+	                            nextPath.add(nb);
+	                            if (nextPath.size() == tickets.length + 1) {
+	                                results.add(nextPath);
+	                                continue;    
+	                            }
+	                            nextPaths.add(nextPath);
+	                            Set<String> nextVisited = new HashSet<>(visited);
+	                            nextVisited.add(nb);
+	                            nextVisitedList.add(nextVisited);
+	                        }
+	                    }
 	                }
-	                path.append(nb); // modify
-	                dfs(nb, nodeNbs, path, paths);
-	                add(nodeNbs, node, nb); // restore
-	                path.delete(path.length()-3, path.length()); // restore
 	            }
+	            paths = nextPaths;
+	            visitedList = nextVisitedList;
 	        }
+	        
+	        Comparator<List<String>> comp = new Comparator<List<String>> () {
+	            @Override
+	            public int compare(List<String> l1, List<String> l2) {
+	                for (int i = 0; i < l1.size(); i++) {
+	                    int diff = l1.get(i).compareTo(l2.get(i));
+	                    if (diff != 0)
+	                        return diff;
+	                }
+	                return 0;
+	            }
+	        };
+	        PriorityQueue<List<String>> q = new PriorityQueue<>(comp);
+	        for (List<String> result : results)
+	            q.add(result);
+	        return q.poll();
 	    }
 	    
-	    private void add(Map<String, Set<String>> nodeNbs, String node, String nb) {
-	        Set<String> nbs = nodeNbs.get(node);
+	    private void add(String node, String nb, Map<String, List<String>> map) {
+	        List<String> nbs = map.get(node);
 	        if (nbs == null) {
-	            nbs = new HashSet<>();
-	            nodeNbs.put(node, nbs);
+	            nbs = new LinkedList<>();
+	            map.put(node, nbs);
 	        }
 	        nbs.add(nb);
+	    }
+	}
+	
+	
+	// Solution I: TLE
+	static class SolutionII extends ReconstructItinerary {
+		public List<String> findItinerary(String[][] tickets) {
+	        List<List<String>> results = new ArrayList<>();
+	        Map<String, Set<String>> nodeNbs = new HashMap<>();
+	        for (String[] ticket : tickets) {
+	            String node = ticket[0], nb = ticket[1];
+	            add(node, nb, nodeNbs);
+	        }
+	        
+	        List<String> path = new ArrayList<>();
+	        path.add("JFK");
+	        dfs("JFK", path, tickets.length+1, nodeNbs, results);
+	        Comparator<List<String>> comp = new Comparator<List<String>> () {
+	            @Override
+	            public int compare(List<String> l1, List<String> l2) {
+	                for (int i = 0; i < l1.size(); i++) {
+	                    int diff = l1.get(i).compareTo(l2.get(i));
+	                    if (diff != 0)
+	                        return diff;
+	                }
+	                return 0;
+	            }
+	        };
+	        PriorityQueue<List<String>> q = new PriorityQueue<>(comp);
+	        for (List<String> result : results)
+	            q.add(result);
+	        return q.poll();
+	    }
+	    
+	    private void add(String node, String nb, Map<String, Set<String>> map) {
+	        Set<String> nbs = map.get(node);
+	        if (nbs == null) {
+	            nbs = new HashSet<>();
+	            map.put(node, nbs);
+	        }
+	        nbs.add(nb);
+	    }
+	    
+	    private void dfs(String node, List<String> path, int len, Map<String, Set<String>> nodeNbs, 
+	        List<List<String>> results) {
+	        // termination
+	        if (path.size() == len)
+	            results.add(path);
+	        else {
+	            Set<String> nbs = nodeNbs.get(node);
+	            if (nbs != null && !nbs.isEmpty()) {
+	                Set<String> nbs2 = new HashSet<>(nbs);
+	                for (String nb : nbs2) {
+	                    // modify
+	                    nbs.remove(nb);
+	                    path.add(nb);
+	                    dfs(nb, path, len, nodeNbs, results);
+	                    // restore
+	                    nbs.add(nb);
+	                    path.remove(path.size()-1);
+	                }
+	            }
+	        }
 	    }
 	}
 }

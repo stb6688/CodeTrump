@@ -13,15 +13,46 @@ import com.leetcode.util.ArrayUtil;
 public abstract class CourseSchedule {
 	public abstract boolean canFinish(int numCourses, int[][] prerequisites);
 	public static void main(String[] args) {
-		CourseSchedule instance = new SolutionI();
+		CourseSchedule instance = new SolutionII();
 		int numCourses; int[][] prerequisites;
 		boolean res;
 		
-		numCourses = 10;
-		prerequisites = ArrayUtil.str2int2DArray("[[5,8],[3,5],[1,9],[4,5],[0,2],[1,9],[7,8],[4,9]]");
+//		numCourses = 10;
+//		prerequisites = ArrayUtil.str2int2DArray("[[5,8],[3,5],[1,9],[4,5],[0,2],[1,9],[7,8],[4,9]]");
+		
+		numCourses = 2;
+		prerequisites = ArrayUtil.str2int2DArray("[[1, 0]]");
 		
 		res = instance.canFinish(numCourses, prerequisites);
 		System.out.println("result=" + res);
+	}
+	
+	
+	static class SolutionII extends CourseSchedule {
+		public boolean canFinish(int numCourses, int[][] prerequisites) {
+	        int[] status = new int[numCourses];
+	        Map<Integer, Set<Integer>> cPres = new HashMap<>();
+	        for (int c = 0; c < numCourses; cPres.put(c, new HashSet<>()), c++);
+	        for (int[] p : prerequisites)
+	            cPres.get(p[0]).add(p[1]);
+	        for (int c = 0; c < numCourses; c++) {
+	            if (status[c] == 0 && !dfs(c, cPres, status))
+	                return false;
+	        }
+	        return true;
+	    }
+	    
+	    private boolean dfs(int c, Map<Integer, Set<Integer>> cPres, int[] status) {
+	        if (status[c] == 1)    // visit the same course twice, loop detected
+	            return false;
+	        status[c] = 1;
+	        for (Integer pre : cPres.get(c)) {
+	            if (status[pre] != 2 && !dfs(pre, cPres, status))
+	                return false;
+	        }
+	        status[c] = 2;
+	        return true;
+	    }
 	}
 	
 	
