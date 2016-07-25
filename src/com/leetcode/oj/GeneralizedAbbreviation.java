@@ -1,19 +1,69 @@
 package com.leetcode.oj;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 public abstract class GeneralizedAbbreviation {
 	public abstract List<String> generateAbbreviations(String word);
 	public static void main(String[] args) {
-		GeneralizedAbbreviation instance = new SolutionII();
+		GeneralizedAbbreviation instance = new SolutionIII();
 		String word;
 		List<String> results;
 		
-		word = "word";
+//		word = "word";
+		
+		word = "aaa";
 		
 		results = instance.generateAbbreviations(word);
 		System.out.println("results=" + results);
+	}
+	
+	
+	static class SolutionIII extends GeneralizedAbbreviation {
+		public List<String> generateAbbreviations(String word) {
+	        if (word == null || word.isEmpty())
+	            return Collections.emptyList();
+	        List<String> rets = new LinkedList<>();
+	        Deque<String> q = new LinkedList<>();
+	        q.add(word);
+	        Set<String> used = new HashSet<>();
+	        used.add(word); // just to follow the convention
+	        while (!q.isEmpty()) {
+	            String s = q.removeFirst();
+if (s.equals("a2"))
+	System.out.println();
+	            rets.add(s);
+	            for (int m = 0; m < s.length(); m++) {
+	                int num = 1;
+	                StringBuilder left  = new StringBuilder(s.substring(0, m));
+	                StringBuilder right = new StringBuilder(s.substring(m+1, s.length()));
+	                StringBuilder lnum = new StringBuilder();
+	                while (left.length() > 0 && Character.isDigit(left.charAt(left.length()-1))) {
+	                    lnum.insert(0, left.charAt(left.length()-1));
+	                    left.deleteCharAt(left.length()-1);
+	                }
+	                if (lnum.length() > 0)
+	                    num += Integer.valueOf(lnum.toString());
+	                StringBuilder rnum = new StringBuilder();
+	                while (right.length() > 0 && Character.isDigit(right.charAt(0))) {
+	                    rnum.append(right.charAt(0));
+	                    right.deleteCharAt(0);
+	                }
+	                if (rnum.length() > 0)
+	                    num += Integer.valueOf(rnum.toString());
+	                String nextS = new StringBuilder(left).append(num).append(right).toString();
+	                if (used.add(nextS))
+	                    q.add(nextS);
+	            }
+	        }
+	        
+	        return rets;
+	    }
 	}
 	
 	
