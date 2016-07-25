@@ -4,8 +4,58 @@ import java.util.Comparator;
 import java.util.PriorityQueue;
 import java.util.TreeMap;
 
-public class ContainsDuplicateIII {
+public abstract class ContainsDuplicateIII {
+	public abstract boolean containsNearbyAlmostDuplicate(int[] nums, int k, int t);
+	public static void main(String[] args) {
+		ContainsDuplicateIII instance = new SolutionII();
+		int[] nums; int k, t;
+		boolean res;
+		
+//		nums = new int[]{-1, -1};
+//		k = 1; t = 0;
+		
+		// false
+//		nums = new int[]{1};
+//		k = 1; t = 1;
+		
+		// false
+		nums = new int[]{-3, 3};
+		k = 2; t = 4;
+		
+		res = instance.containsNearbyAlmostDuplicate(nums, k, t);
+		System.out.println("result=" + res);
+	}
 	
+	
+	static class SolutionII extends ContainsDuplicateIII {
+		public boolean containsNearbyAlmostDuplicate(int[] nums, int k, int t) {
+	        if (k == 0)
+	            return false;
+	        
+	        TreeMap<Integer, Integer> numCount = new TreeMap<>();
+	        for (int i = 0; i < nums.length; i++) {
+	            int num = nums[i];
+	            Integer count = numCount.get(num);
+	            if (count == null)
+	                count = 0;
+	            numCount.put(num, count+1);
+	            if (i-k-1 >= 0) {
+	                int oldest = nums[i-k-1];
+	                count = numCount.get(oldest);
+	                if (count == 1)
+	                    numCount.remove(oldest);
+	                else
+	                    numCount.put(oldest, count-1);
+	            }
+	            if (i > 0 && Math.abs(numCount.lastKey() - numCount.firstKey()) <= t)
+	                return true;
+	        }
+	        return false;
+	    }
+	}
+	
+	
+	/*
 	public boolean containsNearbyAlmostDuplicate(int[] nums, int k, int t) {
         if (k < 0 || t < 0)
             return false;
@@ -34,7 +84,7 @@ public class ContainsDuplicateIII {
         }
         return false;
     }
-	
+	*/
 	
 	// Solution I: TLE
 	/*
@@ -50,28 +100,4 @@ public class ContainsDuplicateIII {
     }
     */
 	
-	public static void main(String[] args) {
-		ContainsDuplicateIII instance = new ContainsDuplicateIII();
-		int[] nums;
-		int k, t;
-		
-		// true
-		nums = new int[]{-1, -1};
-		k = 1; t = 0;
-		
-		// false
-//		nums = new int[]{-1, -1};
-//		k = 1; t = -1;
-		
-		// false
-//		nums = new int[]{4, 2};
-//		k = 2; t = 1;
-		
-		
-		long t1 = System.currentTimeMillis();
-		boolean result = instance.containsNearbyAlmostDuplicate(nums, k, t);
-		long t2 = System.currentTimeMillis();
-		System.out.println("result=" + result);
-		System.out.println(String.format("time=%,dms", (t2 - t1)));
-	}
 }
