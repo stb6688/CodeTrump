@@ -107,4 +107,10 @@ public class ListNode {
 		
 		return head;
 	}
+	
+	public boolean equals(Object n) {
+		if (!(n instanceof ListNode))
+			return false;
+		return ((ListNode)n).val == this.val;
+	}
 }

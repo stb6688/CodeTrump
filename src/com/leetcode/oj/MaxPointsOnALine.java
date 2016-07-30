@@ -6,7 +6,8 @@ import java.util.Map;
 import java.util.Set;
 
 public abstract class MaxPointsOnALine {
-	class Point {
+	public abstract int maxPoints(Point[] points);
+	static class Point {
 		int x, y;
 		Point() {
 			x = 0;
@@ -16,9 +17,65 @@ public abstract class MaxPointsOnALine {
 			this.x = x;
 			this.y = y;
 		}
+		@Override
+		public String toString() {
+			return "[" + x + "," + y + "]";
+		}
 	}
 	
-	public abstract int maxPoints(Point[] points);
+	public static void main(String[] args) {
+		MaxPointsOnALine instance = new SolutionIII();
+		Point[] points;
+		int res;
+		
+		points = new Point[]{new Point(0, 0), new Point(-1, -1), new Point(2, 2)};
+		
+		res = instance.maxPoints(points);
+		System.out.println("result=" + res);
+	}
+	
+	
+	static class SolutionIII extends MaxPointsOnALine {
+		public int maxPoints(Point[] points) {
+	        if (points.length == 0)
+	            return 0;
+	        int ret = 0;
+	        
+	        for (int i = 0; i < points.length; i++) {
+	            int dups = 0, max = 0;
+	            Map<Double, Integer> slopeCount = new HashMap<>();
+	            for (int j = i+1; j < points.length; j++) {
+	                Point p1 = points[i], p2 = points[j];
+System.out.println("p1=" + p1 + ", p2=" + p2);
+	                int x1 = p1.x, y1 = p1.y;
+	                int x2 = p2.x, y2 = p2.y;
+	                if (x1 == x2 && y1 == y2) {
+	                    dups++;
+	                } else {
+	                    double slope = Double.POSITIVE_INFINITY;
+	                    int dx = x1 - x2, dy = y1 - y2;
+	                    if (dx != 0) {
+	                        if (dy == 0)
+	                            slope = 0.0;
+	                        else
+	                            slope = 1.0*dy/dx;
+	                    }
+	                    Integer count = slopeCount.get(slope);
+	                    if (count == null)
+	                        count = 0;
+
+	                    slopeCount.put(slope, count+1);
+	                    max = Math.max(max, count+1);
+System.out.println("count=" + (count + 1) + ", dups=" + dups);
+	                }
+	            }
+	            ret = Math.max(ret, 1 + max + dups);
+	        }
+	        
+	        return ret;
+	    }
+	}
+	
 	
 	// Solution II: Accepted
 	class SolutionII extends MaxPointsOnALine {
