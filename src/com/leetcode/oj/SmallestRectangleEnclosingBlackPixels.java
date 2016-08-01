@@ -1,5 +1,6 @@
 package com.leetcode.oj;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -11,7 +12,7 @@ import com.leetcode.util.annotations.Leetcode.Tags;
 public abstract class SmallestRectangleEnclosingBlackPixels {
 	public abstract int minArea(char[][] image, int x, int y);
 	public static void main(String[] args) {
-		SmallestRectangleEnclosingBlackPixels instance = new SolutionI();
+		SmallestRectangleEnclosingBlackPixels instance = new SolutionIII();
 		char[][] image; int x, y;
 		int result;
 		
@@ -19,6 +20,40 @@ public abstract class SmallestRectangleEnclosingBlackPixels {
 		x = 0; y = 2;
 		result = instance.minArea(image, x, y);
 		System.out.println("result=" + result);
+	}
+	
+	
+	static class SolutionIII extends SmallestRectangleEnclosingBlackPixels {
+		private static final int[][] dirs = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+	    public int minArea(char[][] image, int x, int y) {
+	        int rows = image.length, cols = image[0].length;
+	        boolean[][] used = new boolean[rows][cols];
+	        used[x][y] = true;
+	        int minR = x, minC = y;
+	        int maxR = x, maxC = y;
+	        List<int[]> list = Arrays.asList(new int[]{x, y});
+	        while (!list.isEmpty()) {
+	            List<int[]> nextList = new LinkedList<>();
+	            for (int[] p : list) {
+	                int r = p[0], c = p[1];
+System.out.println("r=" + r + ", c=" + c);
+	                minR = Math.min(minR, r);
+	                maxR = Math.max(maxR, r);
+	                minC = Math.min(minC, c);
+	                maxC = Math.max(maxC, c);
+	                for (int[] dir : dirs) {
+	                    int r1 = r + dir[0], c1 = c + dir[1];
+	                    if (r1 >= 0 && r1 < rows && c1 >= 0 && c1 < cols && image[r1][c1] == '1' && !used[r1][c1]) {
+	                        used[r1][c1] = true;
+	                        nextList.add(new int[]{r1, c1});
+	                    }
+	                }
+	            }
+	            list = nextList;
+	        }
+	        
+	        return (maxR - minR + 1)*(maxC - minC + 1);
+	    }
 	}
 	
 	

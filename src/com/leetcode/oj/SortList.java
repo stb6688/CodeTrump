@@ -9,7 +9,9 @@ public abstract class SortList {
 		ListNode head;
 		ListNode res;
 		
-		head = ListNode.deserialize("[2,1]");
+//		head = ListNode.deserialize("[2,1]");
+		
+		head = ListNode.deserialize("[3,2,4]");
 		
 		res = instance.sortList(head);
 		System.out.println("result=" + ListNode.serialize(res));
@@ -18,41 +20,39 @@ public abstract class SortList {
 	
 	static class SolutionI extends SortList {
 		public ListNode sortList(ListNode head) {
-System.out.println("list=" + ListNode.serialize(head));
+System.out.println(">>> input=" + ListNode.serialize(head));
 	        if (head == null || head.next == null)
 	            return head;
 	        ListNode slow = head, fast = head.next;
 	        while (fast != null) {
-	            slow = slow.next; // ERROR: infinity loop
 	            if (fast.next == null)
 	                break;
-//	            slow = slow.next;
 	            fast = fast.next.next;
+	            slow = slow.next;
 	        }
-System.out.println("slow=" + slow);
-//	        ListNode head2 = slow.next;
-			ListNode head2 = slow;
+	        ListNode head1 = slow.next;
 	        slow.next = null;
-	        head = sortList(head);
-	        head2 = sortList(head2);
-	        
+	        sortList(head);
+	        sortList(head1);
 	        ListNode dd = new ListNode(0), n = dd;
-	        while (head != null || head2 != null) {
-	            if (head2 == null || (head != null && head.val < head2.val)) {
-	                ListNode next = head.next;
-	                head.next = n.next;
+System.out.println("head=" + ListNode.serialize(head));
+System.out.println("head1=" + ListNode.serialize(head1));
+	        while (head != null && head1 != null) {
+	            if (head.val < head1.val) {
 	                n.next = head;
 	                n = head;
-	                head = next;
+	                head = head.next;
 	            } else {
-	                ListNode next = head2.next;
-	                head2.next = n.next;
-	                n.next = head2;
-	                n = head2;
-	                head2 = next;
+	                n.next = head1;
+	                n = head1;
+	                head1 = head1.next;
 	            }
 	        }
-	        
+	        if (head != null)
+	            n.next = head;
+	        else if (head1 != null)
+	            n.next = head1;
+System.out.println("merged=" + dd.next);
 	        return dd.next;
 	    }
 	}
