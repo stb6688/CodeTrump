@@ -94,6 +94,8 @@ public class ListNode {
 		s = s.trim();
 		if (s.charAt(0) == '[')
 			s = s.substring(1, s.length()-1);
+		if (s.isEmpty())
+			return null;
 		String[] strs = s.split(",");
 		ListNode head = null, prev = null, curr = null;
 		for (int i = 0; i < strs.length; i++) {

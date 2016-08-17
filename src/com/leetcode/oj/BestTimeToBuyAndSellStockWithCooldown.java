@@ -7,7 +7,7 @@ import com.leetcode.util.ArrayUtil;
 public abstract class BestTimeToBuyAndSellStockWithCooldown {
 	public abstract int maxProfit(int[] prices);
     public static void main(String[] args) {
-    	BestTimeToBuyAndSellStockWithCooldown instance = new SolutionII();
+    	BestTimeToBuyAndSellStockWithCooldown instance = new SolutionIII();
     	int[] prices;
     	
     	// 3
@@ -22,6 +22,68 @@ public abstract class BestTimeToBuyAndSellStockWithCooldown {
     	int result = instance.maxProfit(prices);
     	System.out.println("result=" + result);
 	}
+    
+    
+    static class SolutionIII extends BestTimeToBuyAndSellStockWithCooldown {
+    	public int maxProfit(int[] prices) {
+            if (prices.length <= 1)
+                return 0;
+                
+            Integer[][] profits = new Integer[prices.length][4];
+            for (int idx = 0; idx < prices.length; idx++)
+                Arrays.fill(profits[idx], null);
+            profits[0][0] = 0;
+            for (int idx = 0; idx < prices.length-1; idx++) { // NOTE: skip last row
+                for (int act = 0; act <= 3; act++) {
+                    Integer profit = profits[idx][act];
+                    if (profit == null)
+                        continue;
+                    if (idx == 0 && act != 0)
+                        continue;
+                    switch (act) {
+                        case 0: // sold & cool
+                            // cool
+                            update(profits, idx+1, 0, profit);
+                            // buy
+                            update(profits, idx+1, 2, profit-prices[idx]);
+                            break;
+                        case 1: // bought & cool
+                            // cool
+                            update(profits, idx+1, 1, profit);
+                            // sell
+                            update(profits, idx+1, 3, profit+prices[idx]);
+                            break;
+                        case 2: // buy
+                            // cool
+                            update(profits, idx+1, 1, profit);
+                            // sell
+                            update(profits, idx+1, 3, profit+prices[idx]);
+                            break;
+                        default: // sell
+                            // cool
+                            update(profits, idx+1, 0, profit);
+                            break;
+                    }
+                }
+            }
+for (Integer[] row : profits)
+	System.out.println(Arrays.toString(row));
+            int max = Integer.MIN_VALUE;
+            for (int act = 0; act <= 3; act++) {
+                Integer profit = profits[prices.length-1][act];
+                if (profit != null)
+                    max = Math.max(max, profit);
+            }
+            
+            return max;
+        }
+            
+        private void update(Integer[][] profits, int idx, int act, int profit) {
+            Integer old = profits[idx][act];
+            if (old == null || old < profit)
+                profits[idx][act] = profit;
+        }
+    }
     
     
     static class SolutionII extends BestTimeToBuyAndSellStockWithCooldown {

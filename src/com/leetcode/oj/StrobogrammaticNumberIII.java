@@ -1,6 +1,8 @@
 package com.leetcode.oj;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 public abstract class StrobogrammaticNumberIII {
@@ -17,12 +19,81 @@ public abstract class StrobogrammaticNumberIII {
 		// 125
 //		low = "10000001"; high = "20000000";
 		
-		low = "0"; high = "0";
+		// 1
+//		low = "0"; high = "0";
+		
+		// 21
+		low = "0"; high = "1680";
+		
 		
 		t1 = System.currentTimeMillis();
 		result = instance.strobogrammaticInRange(low, high);
 		t2 = System.currentTimeMillis();
 		System.out.println(String.format("result=%d, total time=%,dms", result, (t2 - t1)));
+	}
+	
+	
+	static class SolutionIII extends StrobogrammaticNumberIII {
+		private static final int[][] pairs = {{1, 1}, {8, 8}, {6, 9}, {9, 6}};
+	    public int strobogrammaticInRange(String low, String high) {
+	        if (compare(low, high) > 0)
+	            return 0;
+	        
+	        int len1 = low.length(), len2 = high.length();
+	        List<List<StringBuilder>> lists = new ArrayList<>(len2+2);
+	        List<StringBuilder> list0 = Arrays.asList(new StringBuilder());
+	        List<StringBuilder> list1 = new ArrayList<>();
+	        list1.add(new StringBuilder("0"));
+	        list1.add(new StringBuilder("1"));
+	        list1.add(new StringBuilder("8"));
+	        lists.add(list0);
+	        lists.add(list1);
+	        for (int len = 2; len <= len2; len++) {
+	            List<StringBuilder> curr = new LinkedList<>();
+	            List<StringBuilder> prev = lists.get(len-2);
+	            for (StringBuilder prevB : prev) {
+	                for (int[] pair : pairs) {
+	                    StringBuilder b = new StringBuilder(prevB.length()+2);
+	                    b.append(pair[0]).append(prevB).append(pair[1]);
+	                    curr.add(b);
+	                }
+	            }
+	            lists.add(curr);
+	        }
+System.out.println(lists);
+	        
+	        int count = 0;
+	        if (len1 == len2) {
+	            for (StringBuilder b : lists.get(len1)) {
+	                if (compare(b.toString(), low) >= 0 && compare(b.toString(), high) <= 0)
+	                    count++;
+	            }
+	        } else {
+	            for (int len = len1+1; len <= len2-1; len++)
+	                count += lists.get(len).size();
+	            for (StringBuilder b : lists.get(len1)) {
+	                if (compare(b.toString(), low) >= 0)
+	                    count++;
+	            }
+	            for (StringBuilder b : lists.get(len2)) {
+	                if (compare(b.toString(), high) <= 0)
+	                    count++;
+	            }
+	        }
+	        
+	        return count;
+	    }
+	    
+	    private static int compare(String b, String s) {
+	        if (b.length() != s.length())
+	            return b.length() - s.length();
+	        for (int i = 0; i < b.length(); i++) {
+	            char ch1 = b.charAt(i), ch2 = s.charAt(i);
+	            if (ch1 != ch2)
+	                return ch1 - ch2;
+	        }
+	        return 0;
+	    }
 	}
 	
 	
@@ -36,8 +107,10 @@ public abstract class StrobogrammaticNumberIII {
 	        }
 	        int count = 0;
 	        for (String num : nums) {
-	            if (between(num, low, high))
+	            if (between(num, low, high)) {
+System.out.println(num);
 	                count++;
+	            }
 	        }
 	        return count;
 	    }

@@ -2,7 +2,7 @@ package com.leetcode.util;
 
 import java.util.List;
 
-public interface NestedInteger {
+public interface INestedInteger {
 	// @return true if this NestedInteger holds a single integer, rather than a
 	// nested list.
 	public boolean isInteger();
@@ -15,5 +15,5 @@ public interface NestedInteger {
 	// @return the nested list that this NestedInteger holds, if it holds a
 	// nested list
 	// Return null if this NestedInteger holds a single integer
-	public List<NestedInteger> getList();
+	public List<INestedInteger> getList();
 }

@@ -2,9 +2,11 @@ package com.leetcode.oj;
 
 import com.leetcode.util.ListNode;
 import com.leetcode.util.annotations.Leetcode;
+import com.leetcode.util.annotations.Leetcode.Difficulty;
 import com.leetcode.util.annotations.Leetcode.Tags;
 
-@Leetcode(date="2016-06-09", tags={Tags.LIST}, url="https://leetcode.com/problems/swap-nodes-in-pairs/")
+@Leetcode(date="2016-06-09", diff=Difficulty.EASY, tags={Tags.LIST}, 
+	url="https://leetcode.com/problems/swap-nodes-in-pairs/")
 public abstract class SwapNodesInPairs {
 	public abstract ListNode swapPairs(ListNode head);
 	public static void main(String[] args) {
@@ -18,7 +20,7 @@ public abstract class SwapNodesInPairs {
 	}
 	
 	// Solution V: Accepted
-	// recursive solution
+	// no dummy node, recursive solution
 	static class SolutionV extends SwapNodesInPairs {
 		public ListNode swapPairs(ListNode head) {
 	        if (head == null || head.next == null)
@@ -30,33 +32,35 @@ public abstract class SwapNodesInPairs {
 	    }
 	}
 	
-	// Solution III: Accepted
-	// use only 1 dummy node.
-	// swap 2 nodes, append swapped tuplet to dummy list. 
+	
+	// Solution IV: Accepted
+    // use 1 dummy. pick 2 nodes at a time; append odd then even;
+    // then continue with the next 2.
 	static class SolutionIV extends SwapNodesInPairs {
 		public ListNode swapPairs(ListNode head) {
-	        ListNode dd = new ListNode(0), tail = dd;;
-	        ListNode curr = head;
-	        while (curr != null) {
-	            ListNode next = curr.next;
-	            if (next == null) {
-	                tail.next = curr;
+	        ListNode dd = new ListNode(0), n = dd;
+	        ListNode even = head, odd = null;
+	        while (even != null) {
+	            odd = even.next;
+	            if (odd == null) {
+	                n.next = even;
 	                break;
-	            } else {
-	                ListNode next2 = next.next;
-	                next.next = curr;
-	                curr.next = null;
-	                tail.next = next; // next becomes head after swap
-	                tail = curr;
-	                curr = next2;
 	            }
+	            ListNode next = odd.next;
+	            n.next = odd;
+	            n = odd;
+	            n.next = even;
+	            n = even;
+	            n.next = null;
+	            even = next;
 	        }
+	        
 	        return dd.next;
 	    }
 	}
 	
 		
-	// Solution II: Accepted
+	// Solution III: Accepted
 	// put even & odd nodes into 2 lists;
 	// then merge 2 lists into 1, but picking odd first then even.
 	// this example uses the very standard steps (some of them can be simplified) 
@@ -65,45 +69,45 @@ public abstract class SwapNodesInPairs {
 	// 2. merge 2 lists into 1.
 	static class SolutionIII extends SwapNodesInPairs {
 		public ListNode swapPairs(ListNode head) {
-	        ListNode dd1 = new ListNode(0), tail1 = dd1;
-	        ListNode dd2 = new ListNode(0), tail2 = dd2;
+	        ListNode dd1 = new ListNode(0), n1 = dd1;
+	        ListNode dd2 = new ListNode(0), n2 = dd2;
 	        int i = 0;
-	        ListNode curr = head;
-	        while (curr != null) {
-	            ListNode next = curr.next;
-	            curr.next = null;
+	        ListNode node = head;
+	        while (node != null) {
+	            ListNode next = node.next;
 	            if (i%2 == 0) {
-	                tail1.next = curr;
-	                tail1 = curr;
+	                n1.next = node;
+	                n1 = node;
 	            } else {
-	                tail2.next = curr;
-	                tail2 = curr;
+	                n2.next = node;
+	                n2 = node;
 	            }
-	            curr = next;
+	            node.next = null; // extract
+	            node = next;
 	            i++;
 	        }
-	        ListNode curr1 = dd1.next, curr2 = dd2.next;
-	        ListNode dd = new ListNode(0), tail = dd;
-	        while (curr1 != null) {
-	            if (curr2 != null) {
-	                ListNode next2 = curr2.next;
-	                curr2.next = null;
-	                tail.next = curr2;
-	                tail = curr2;
-	                curr2 = next2;
+	        ListNode dd = new ListNode(0), n = dd;
+	        n1 = dd1.next;
+	        n2 = dd2.next;
+	        while (n1 != null || n2 != null) {
+	            if (n2 != null) {
+	                n.next = n2;
+	                n = n2;
+	                n2 = n2.next;
 	            }
-	            ListNode next1 = curr1.next;
-	            curr1.next = null;
-	            tail.next = curr1;
-	            tail = curr1;
-	            curr1 = next1;
+	            if (n1 != null) {
+	                n.next = n1;
+	                n = n1;
+	                n1 = n1.next;
+	            }
 	        }
+	        n.next = null;
 	        return dd.next;
 	    }
 	}
 	
 	
-	// Solution I: Accepted
+	// Solution II: Accepted
 	// maneuver without using dummy nodes; easy to make mistake with edge cases.
 	static class SolutionII extends SwapNodesInPairs {
 		public ListNode swapPairs(ListNode head) {

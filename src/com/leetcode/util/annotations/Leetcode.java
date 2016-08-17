@@ -26,12 +26,25 @@ public @interface Leetcode {
 		REMEMBER,	// just remember this problem, maybe applied in other cases
 	};
 	
+	public static enum Difficulty {
+		IGNORE,
+		EASY,
+		MEDIUM,
+		HARD,
+	}
+	
 	// date of completion
 	String date();
 	
 	// array of tags; default is empty
 	Tags[] tags() default {};
 	
+	// difficulty levels
+	Difficulty diff() default Difficulty.EASY;
+	
 	// url
 	String url() default "";
+	
+	// blog
+	String blog() default "";
 }

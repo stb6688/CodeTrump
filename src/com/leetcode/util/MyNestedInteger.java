@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Stack;
 
-public class MyNestedInteger implements NestedInteger {
+public class MyNestedInteger implements INestedInteger {
 	
 	private Object o;
 	
@@ -13,7 +13,7 @@ public class MyNestedInteger implements NestedInteger {
 		o = i;
 	}
 	
-	public MyNestedInteger(List<NestedInteger> list) {
+	public MyNestedInteger(List<INestedInteger> list) {
 		o = list;
 	}
 
@@ -28,8 +28,8 @@ public class MyNestedInteger implements NestedInteger {
 	}
 
 	@Override
-	public List<NestedInteger> getList() {
-		return (List<NestedInteger>)o;
+	public List<INestedInteger> getList() {
+		return (List<INestedInteger>)o;
 	}
 	
 	@Override
@@ -40,20 +40,20 @@ public class MyNestedInteger implements NestedInteger {
 			return this.getList().toString();
 	}
 	
-	public static List<NestedInteger> str2list(String s) {
-		List<NestedInteger> result = new ArrayList<>();
+	public static List<INestedInteger> str2list(String s) {
+		List<INestedInteger> result = new ArrayList<>();
 		String[] splits = s.split(",");
-		Stack<List<NestedInteger>> stack = new Stack<>();
+		Stack<List<INestedInteger>> stack = new Stack<>();
 		for (String split : splits) {
 			int i = 0;
 			while (i < split.length()) {
 				char c = split.charAt(i);
 				if (c == '[') {
-					List<NestedInteger> list = new ArrayList<>();
+					List<INestedInteger> list = new ArrayList<>();
 					stack.push(list);
 					i++;
 				} else if (c == ']') {
-					List<NestedInteger> list = stack.pop();
+					List<INestedInteger> list = stack.pop();
 					if (stack.isEmpty())
 						result = list;
 					else
@@ -75,7 +75,7 @@ public class MyNestedInteger implements NestedInteger {
 	
 	public static void main(String[] args) {
 		String s = "[[1,1],2,[1,1]]";
-		List<NestedInteger> nestedList = MyNestedInteger.str2list(s);
+		List<INestedInteger> nestedList = MyNestedInteger.str2list(s);
 		System.out.println(nestedList);
 	}
 }

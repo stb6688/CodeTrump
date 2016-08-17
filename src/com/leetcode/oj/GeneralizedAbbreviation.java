@@ -24,6 +24,47 @@ public abstract class GeneralizedAbbreviation {
 	}
 	
 	
+	static class SolutionIV extends GeneralizedAbbreviation {
+		public List<String> generateAbbreviations(String word) {
+	        if (word.isEmpty())
+	            return Collections.singletonList("");
+	            
+	        List<StringBuilder> list = new LinkedList<>();
+	        bt(new StringBuilder(), word, 0, list);
+	        List<String> rets = new LinkedList<>();
+	        for (StringBuilder b : list) {
+	            int i = 0;
+	            while (i + 1 < b.length()) {
+	                char curr = b.charAt(i), next = b.charAt(i+1);
+	                if (Character.isDigit(curr) && Character.isDigit(next)) {
+	                    b.deleteCharAt(i);
+	                    b.deleteCharAt(i);
+	                    String num = String.valueOf((curr-'0') + (next-'0'));
+	                    b.insert(i, num);
+	                }
+	                i++;
+	            }
+	            rets.add(b.toString());
+	        }
+	        
+	        return rets;
+	    }
+	    
+	    private void bt(StringBuilder b, String word, int idx, List<StringBuilder> list) {
+	        if (idx == word.length()) {
+	            list.add(new StringBuilder(b));
+	        } else {
+	            b.append(word.charAt(idx)); // modify
+	            bt(b, word, idx+1, list);
+	            b.deleteCharAt(b.length()-1);   // restore
+	            b.append(1); // modify
+	            bt(b, word, idx+1, list);
+	            b.deleteCharAt(b.length()-1);   // restore
+	        }
+	    }
+	}
+	
+	
 	static class SolutionIII extends GeneralizedAbbreviation {
 		public List<String> generateAbbreviations(String word) {
 	        if (word == null || word.isEmpty())

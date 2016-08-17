@@ -6,16 +6,16 @@ import java.util.List;
 import java.util.Stack;
 
 import com.leetcode.util.MyNestedInteger;
-import com.leetcode.util.NestedInteger;
+import com.leetcode.util.INestedInteger;
 
 public class FlattenNestedListIterator {
 
 	public class NestedIterator implements Iterator<Integer> {
 	    
 	    private Integer nextInt;
-	    private Iterator<NestedInteger> itr;
-	    private Stack<List<NestedInteger>> stack;
-	    public NestedIterator(List<NestedInteger> nestedList) {
+	    private Iterator<INestedInteger> itr;
+	    private Stack<List<INestedInteger>> stack;
+	    public NestedIterator(List<INestedInteger> nestedList) {
 	        nextInt = null;
 	        itr = nestedList.iterator();
 	        stack = new Stack<>();
@@ -43,7 +43,7 @@ public class FlattenNestedListIterator {
 	                    if (stack.peek().isEmpty())
 	                        stack.pop();
 	                    else {
-	                        NestedInteger i = stack.peek().remove(0);
+	                        INestedInteger i = stack.peek().remove(0);
 	                        if (i.isInteger()) {
 	                            nextInt = i.getInteger();
 	                            break;
@@ -52,7 +52,7 @@ public class FlattenNestedListIterator {
 	                    }
 	                }
 	            } else {
-	                NestedInteger i = itr.next();
+	                INestedInteger i = itr.next();
 	                if (i.isInteger())
 	                    nextInt = i.getInteger();
 	                else
@@ -113,7 +113,7 @@ public class FlattenNestedListIterator {
 	public static void main(String[] args) {
 		FlattenNestedListIterator instance = new FlattenNestedListIterator();
 		String s = "[[1,1],2,[1,1]]";
-		List<NestedInteger> nestedList = MyNestedInteger.str2list(s);
+		List<INestedInteger> nestedList = MyNestedInteger.str2list(s);
 		NestedIterator i = instance.new NestedIterator(nestedList);
 		while (i.hasNext()) 
 			System.out.println(i.next());
