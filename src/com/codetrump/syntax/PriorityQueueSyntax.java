@@ -1,4 +1,4 @@
-package com.codetrump.leetcode.syntax;
+package com.codetrump.syntax;
 
 import java.util.ArrayList;
 import java.util.Arrays;

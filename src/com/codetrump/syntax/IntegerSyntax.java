@@ -1,4 +1,4 @@
-package com.codetrump.leetcode.syntax;
+package com.codetrump.syntax;
 
 public class IntegerSyntax {
 	public static void main(String[] args) {
