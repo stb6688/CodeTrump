@@ -1,4 +1,4 @@
-package com.codetrump.leetcode.util;
+package com.codetrump.leetcode.oj;
 
 import java.util.HashSet;
 import java.util.Iterator;

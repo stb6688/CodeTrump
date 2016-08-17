@@ -1,9 +1,11 @@
-package com.codetrump.leetcode.util;
+package com.codetrump.leetcode.oj;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.codetrump.leetcode.util.UndirectedGraphNode;
 
 public class CloneGraph {
 	public UndirectedGraphNode cloneGraph(UndirectedGraphNode node) {

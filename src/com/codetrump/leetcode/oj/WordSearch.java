@@ -1,97 +1,177 @@
 package com.codetrump.leetcode.oj;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
-public class WordSearch {
-	
-private static final int[][] moves = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
-    
-    public boolean exist(char[][] board, String word) {
-        int rows = board.length;
-        int cols = board[0].length;
-        char[] chars = word.toCharArray();
-        for (int r = 0; r < rows; r++) {
-            for (int c = 0; c < cols; c++) {
-                if (dfs(r, c, board, rows, cols, 0, chars, new HashSet<Integer>()))
-                    return true;
-            }
-        }
-        return false;
-    }
-    
-    private boolean dfs(int r, int c, char[][] board, int rows, int cols, int i, char[] chars, Set<Integer> visited) {
-        if (r < 0 || r == rows || c < 0 || c == cols)
-            return false;
-        if (board[r][c] == chars[i]) {
-            int hash = cols*r + c;
-            if (!visited.add(hash))
-                return false;
-System.out.println("r=" + r + ", c=" + c + ", i=" + i + ", visited=" + visited);
-            if (i == chars.length - 1)
-                return true;
-            for (int[] move : moves) {
-                if (dfs(r + move[0], c + move[1], board, rows, cols, i+1, chars, visited))
-                    return true;
-            }
-            visited.remove(hash);
-        }
-        return false;
-    }
-	
-    // Solution I: wrong logic
-    /*
-	public boolean exist(char[][] board, String word) {
-        int[][] moves = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
-        int rows = board.length;
-        if (rows == 0)
-            return false;
-        int cols = board[0].length;
-        if (cols == 0)
-            return false;
-            
-        for (int r = 0; r < rows; r++) {
-            for (int c = 0; c < cols; c++) {
-                if (bfs(board, r, c, rows, cols, word.toCharArray(), 0, moves, new HashSet<Integer>()))
-                    return true;
-            }
-        }
-        return false;
-    }
-    
-    private boolean bfs(char[][] board, int r, int c, int rows, int cols, char[] chars, int index, int[][] moves, Set<Integer> visited) {
-        // row/col out of bound
-        if (r < 0 || r == rows || c < 0 || c == cols)
-            return false;
-        
-        if (board[r][c] == chars[index]) {
-        	// visited
-            if (!visited.add(cols*r + c))
-                return false;
-            if (index == chars.length - 1)
-                return true;
-            for (int[] move : moves)
-                if (bfs(board, r+move[0], c+move[1], rows, cols, chars, index+1, moves, visited))
-                    return true;
-        }
-        return false;
-    }
-    */
-    
-    public static void main(String[] args) {
-    	WordSearch instance = new WordSearch();
-    	char[][] board;
-    	String word;
-    	
-    	// true
-//    	board = new char[][]{{'a', 'b'}, {'c', 'd'}};
-//    	word = "acdb";
-    	
-    	board = new char[][]{{'a', 'a'}};
-    	word = "aaa";
-    	
-    	boolean result = instance.exist(board, word);
-    	System.out.println("result=" + result);
+public abstract class WordSearch {
+	public abstract boolean exist(char[][] board, String word);
+	public static void main(String[] args) {
+		WordSearch instance = new SolutionIII();
+		char[][] board; String word;
+		boolean result;
+		
+		board = new char[][] {{'a', 'b'}, {'c', 'd'}};
+		word = "acdb";
+		
+		result = instance.exist(board, word);
+		System.out.println("result=" + result);
 	}
-
+	
+	
+	static class SolutionIV extends WordSearch {
+		private static final int[][] dirs = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+	    public boolean exist(char[][] board, String word) {
+	        if (board == null || board.length == 0 || board[0].length == 0)
+	            return false;
+	        // word is not null or empty
+	        int rows = board.length, cols = board[0].length;
+	        for (int r = 0; r < rows; r++) {
+	            for (int c = 0; c < cols; c++) {
+	                if (dfs(board, r, c, word))
+	                    return true;
+	            }
+	        }
+	        return false;
+	    }
+	    
+	    private boolean dfs(char[][] board, int r, int c, String word) {
+	        Set<Integer> used = new HashSet<>();
+	        return recurse(board, r, c, word, 0, used);
+	    }
+	    
+	    private boolean recurse(char[][] board, int r, int c, String word, int idx, Set<Integer> used) {
+	        int rows = board.length, cols = board[0].length;
+	        int p = r*cols + c;
+	        if (used.add(p)) { // modify
+	            if (board[r][c] == word.charAt(idx)) {
+	                if (idx == word.length()-1)
+	                    return true;    // termination
+	                else {
+	                    for (int[] dir : dirs) {
+	                        int r1 = r + dir[0], c1 = c + dir[1];
+	                        if (r1 >= 0 && r1 < rows && c1 >= 0 && c1 < cols) {
+	                            if (recurse(board, r1, c1, word, idx+1, used))
+	                                return true;
+	                        }
+	                    }
+	                }
+	            }
+	            used.remove(p); // restore
+	        }
+	        return false;
+	    }
+	}
+	
+	static class SolutionIII extends WordSearch {
+		private static final int[][] dirs = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+	    public boolean exist(char[][] board, String word) {
+	        if (board == null || board.length == 0 || board[0].length == 0)
+	            return false;
+	        // word is not null or empty
+	        int rows = board.length, cols = board[0].length;
+	        char ch0 = word.charAt(0);
+	        for (int r = 0; r < rows; r++) {
+	            for (int c = 0; c < cols; c++) {
+	                if (ch0 == board[r][c] && bfs(board, r, c, word))
+	                    return true;
+	            }
+	        }
+	        return false;
+	    }
+	    
+	    private boolean bfs(char[][] board, int r, int c, String word) {
+	        int rows = board.length, cols = board[0].length;
+	        List<Integer> ps = new ArrayList<>();
+	        int p0 = cols*r + c;
+	        ps.add(p0);
+	        List<Set<Integer>> usedSets = new ArrayList<>();
+	        Set<Integer> set0 = new HashSet<>();
+	        set0.add(p0);
+	        usedSets.add(set0);
+	        for (int i = 1; i < word.length(); i++) {
+	            List<Integer> nextPs = new ArrayList<>();
+	            List<Set<Integer>> nextSets = new ArrayList<>();
+	            char ch = word.charAt(i);
+	            boolean found = false;
+	            for (int j = 0; j < ps.size(); j++) {
+	                int p = ps.get(j);
+	                Set<Integer> usedSet = usedSets.get(j);
+	                int r1 = p/cols, c1 = p%cols;
+	                for (int[] dir : dirs) {
+	                    int r2 = r1 + dir[0], c2 = c1 + dir[1];
+	                    int nextP = cols*r2 + c2;
+	                    if (r2 >= 0 && r2 < rows && c2 >= 0 && c2 < cols && !usedSet.contains(nextP)) {
+	                        if (board[r2][c2] == ch) {
+	                            found = true;
+	                            nextPs.add(nextP);
+	                            Set<Integer> nextSet = new HashSet<>(usedSet);
+	                            nextSet.add(nextP);
+	                            nextSets.add(nextSet);
+	                        }
+	                    }
+	                }
+	            }
+	            if (!found)
+	                return false;
+	            ps = nextPs;
+	            usedSets = nextSets;
+	        }
+	        return true;
+	    }
+	}
+	
+	
+	// Solution I: Logic Error
+	static class SolutionI extends WordSearch {
+		private static final int[][] dirs = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+	    public boolean exist(char[][] board, String word) {
+	        if (board == null || board.length == 0 || board[0].length == 0)
+	            return false;
+	        // word is not null or empty
+	        int rows = board.length, cols = board[0].length;
+	        for (int r = 0; r < rows; r++) {
+	            for (int c = 0; c < cols; c++) {
+	                if (bfs(board, r, c, word))
+	                    return true;
+	            }
+	        }
+	        return false;
+	    }
+	    
+	    private boolean bfs(char[][] board, int r, int c, String word) {
+	        int rows = board.length, cols = board[0].length;
+	        Set<Integer> used = new HashSet<>();
+	        List<Integer> ps = new ArrayList<>();
+	        int p0 = cols*r + c;
+	        ps.add(p0);
+	        used.add(p0);
+	        for (int i = 0; i < word.length(); i++) {
+if (i == 3)
+	System.out.println();
+	            char ch = word.charAt(i);
+	            List<Integer> nextPs = new ArrayList<>();
+	            boolean found = false;
+	            for (int p : ps) {
+	                int r1 = p / cols, c1 = p % cols;
+	                if (board[r1][c1] == ch) {
+	                    found = true;
+	                    for (int[] dir : dirs) {
+	                        int r2 = r1 + dir[0], c2 = c1 + dir[1];
+	                        if (r2 >= 0 && r2 < rows && c2 >= 0 && c2 < cols) {
+	                            int nextP = cols*r2 + c2;
+	                            if (used.add(nextP))
+	                                nextPs.add(nextP);
+	                        }
+	                    }
+	                }
+	            }
+	            if (!found)
+	                return false;
+	            ps = nextPs;
+	        }
+	        return true;
+	    }
+	}
 }
