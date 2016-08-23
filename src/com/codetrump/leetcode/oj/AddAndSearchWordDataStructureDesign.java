@@ -1,12 +1,11 @@
 package com.codetrump.leetcode.oj;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import com.codetrump.leetcode.util.annotations.Leetcode;
+import com.codetrump.leetcode.util.annotations.Leetcode.Difficulty;
+import com.codetrump.leetcode.util.annotations.Leetcode.Tags;
 
+@Leetcode(date="2016-08-22", tags={Tags.TRIE, Tags.BFS, Tags.DFS}, diff=Difficulty.MEDIUM,
+		url="https://leetcode.com/problems/add-and-search-word-data-structure-design/")
 public class AddAndSearchWordDataStructureDesign {
 	
 	public static void main(String[] args) {
@@ -21,13 +20,13 @@ public class AddAndSearchWordDataStructureDesign {
 		instance.addWord("rune");
 		System.out.println(instance.search(".an.")); // false
 		System.out.println(instance.search(".an"));  // true
-		
 	}
 	
 	
 	// Solution VI: Accepted
-    // alternative to solution V: use DFS instead of BFS
-    // again, it's a tree so no cycle
+	// improved from solution V use DFS instead of BFS to search for a word;
+    // DFS is "greedy" while BFS is exhausted search; thus performance improved
+    // despite DFS uses recursion vs. BFS uses iteration.
 	public static class WordDictionary {
 		
 		class TrieNode {

@@ -10,6 +10,7 @@ public @interface Leetcode {
 		RECURSION,
 		RECURSION_VS_ITERATION,
 		DP,
+		BACKTRACKING,
 		MEMOIZATION,
 		TREE,
 		BFS,

@@ -1,7 +1,6 @@
 package com.codetrump.leetcode.oj;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,7 +12,13 @@ import java.util.Set;
 
 import com.codetrump.leetcode.util.ArrayUtil;
 import com.codetrump.leetcode.util.LeetcodeUtils;
+import com.codetrump.leetcode.util.annotations.Leetcode;
+import com.codetrump.leetcode.util.annotations.Leetcode.Difficulty;
+import com.codetrump.leetcode.util.annotations.Leetcode.Tags;
 
+
+@Leetcode(date="2016-08-22", tags={Tags.DFS, Tags.BACKTRACKING, Tags.TRIE}, diff=Difficulty.HARD,
+		url="https://leetcode.com/problems/word-search-ii/")
 public abstract class WordSearchII {
 	public abstract List<String> findWords(char[][] board, String[] words);
 	public static void main(String[] args) {
@@ -61,123 +66,76 @@ public abstract class WordSearchII {
 	}
 	
 	
+	// Solution V: Accepted
+    // Trie + dfs using backtracking.
+    // convert words to trie; at end of each leaf trie node, store the string;
+    // dfs + backtracking to search through table;
+    // once a string is found, set its 'word' to null so it won't be picked twice.
 	static class SolutionV extends WordSearchII {
-		public class TrieNode {
-	        int count = 0;
-	        TrieNode[] children = new TrieNode[26];
-	        String s = null;
-	        public TrieNode(int count) {
-	            this.count = count;
+		class TrieNode {
+	        String word; // null indicate not a leaf
+	        TrieNode[] children;
+	        TrieNode() {
+	            children = new TrieNode[26];
 	        }
 	    }
 	    
-	    private TrieNode root;
+	    TrieNode root = new TrieNode();
 	    public List<String> findWords(char[][] board, String[] words) {
-	        if (board == null || board.length == 0 || board[0].length == 0)
+	        if (board.length == 0 || board[0].length == 0 || words.length == 0)
 	            return Collections.emptyList();
 	        int rows = board.length, cols = board[0].length;
-	        Set<String> set = new HashSet<>(1);
-	        for (String w : words)
-	            set.add(w);
-	        // build Trie
-	        root = new TrieNode(1);
-	        for (String w : set) {
+	        // build the Trie
+	        for (String w : words) {
 	            TrieNode curr = root;
 	            for (char ch : w.toCharArray()) {
-	                TrieNode child = curr.children[ch - 'a'];
-	                if (child == null) {
-	                    child = new TrieNode(1);
-	                    curr.children[ch-'a'] = child;
+	                int idx = ch - 'a';
+	                TrieNode next = curr.children[idx];
+	                if (next == null) {
+	                    next = new TrieNode();
+	                    curr.children[idx] = next;
 	                }
-	                curr = child;
+	                curr = next;
 	            }
-	            curr.s = w;
+	            curr.word = w;
 	        }
-	        List<String> results = new ArrayList<>();
+	        // DFS
+	        boolean[][] used = new boolean[rows][cols];
+	        List<String> res = new LinkedList<>();
 	        for (int r = 0; r < rows; r++) {
 	            for (int c = 0; c < cols; c++) {
-	                Set<Integer> used = new HashSet<>();
-	                used.add(r*cols + c); // this modification will never be restored
-	                search(board, r, c, root, used, results);
+	                dfs(board, r, c, used, root, res);
 	            }
 	        }
 	        
-	        return results;
+	        return res;
 	    }
 	    
 	    private static final int[][] dirs = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
-	    private void search(char[][] board, int r, int c, TrieNode node, Set<Integer> used, List<String> results) {
-	        int rows = board.length, cols = board[0].length;
+	    // for each reachable cell, we check if it matches with curr char
+	    private void dfs(char[][] board, int r, int c, boolean[][] used, TrieNode curr, List<String> res) {
 	        char ch = board[r][c];
-	        TrieNode child = node.children[ch-'a'];
-	        if (child != null) {
-	            if (child.s != null) {
-	                results.add(child.s);
-	                child.s = null;   // so it won't be added to results again, should it be found at another place on table
+	        int idx = ch - 'a';
+	        TrieNode next = null;
+	        if ((next = curr.children[idx]) != null) {
+	            used[r][c] = true; // modify
+	            if (next.word != null) {
+	                res.add(next.word);
+	                next.word = null; // ERROR: avoid duplication
 	            }
-                for (int[] dir : dirs) {
-                    int r1 = r + dir[0], c1 = c + dir[1];
-                    int p1 = r1*cols + c1;
-                    if (r1 >= 0 && r1 < rows && c1 >= 0 && c1 < cols && used.add(p1)) {// modify
-                        search(board, r1, c1, child, used, results);
-                        used.remove(p1);    // restore
-                    }
-                }
+	            for (int[] dir : dirs) {
+	                int r1 = r + dir[0];
+	                int c1 = c + dir[1];
+	                if (r1 >= 0 && r1 < board.length && c1 >= 0 && c1 < board[0].length && !used[r1][c1])
+	                    dfs(board, r1, c1, used, next, res);
+	            }
+	            used[r][c] = false; // backtrack
 	        }
 	    }
 	}
 	
 	
-	static class SolutionIV extends WordSearchII {
-		public List<String> findWords(char[][] board, String[] words) {
-	        if (board == null || board.length == 0 || board[0].length == 0)
-	            return Collections.emptyList();
-	        Set<String> set = new HashSet<>();
-	        for (String w : words)
-	            set.add(w);
-	        int rows = board.length, cols = board[0].length;
-	        List<String> results = new ArrayList<>();
-	        for (String w : set) {
-	            boolean stop = false;
-	            for (int r = 0; r < rows; r++) {
-	                for (int c = 0; c < cols; c++) {
-	                    if (dfs(board, r, c, w, 0, new HashSet<>())) {
-	                        results.add(w);
-	                        stop = true;
-	                        break;
-	                    }
-	                }
-	                if (stop)
-	                    break;
-	            }
-	        }
-	        return results;
-	    }
-	    
-	    private static final int[][] dirs = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
-	    private boolean dfs(char[][] board, int r, int c, String w, int idx, Set<Integer> used) {
-	        int rows = board.length, cols = board[0].length;
-	        if (board[r][c] == w.charAt(idx)) {
-	            int p = r*cols + c;
-	            used.add(p);    // modify
-	            if (idx == w.length()-1)
-	                return true;
-	            else {
-	                for (int[] dir : dirs) {
-	                    int r1 = r + dir[0], c1 = c + dir[1];
-	                    int p1 = r1*cols + c1;
-	                    if (r1 >= 0 && r1 < rows && c1 >= 0 && c1 < cols && !used.contains(p1)
-	                        && dfs(board, r1, c1, w, idx+1, used))
-	                        return true;
-	                }
-	            }
-	            used.remove(p); // restore
-	        }
-	        return false;
-	    }
-	}
-	
-	
+	// Solution III: TLE
 	static class SolutionIII extends WordSearchII {
 		private static final int[][] dirs = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
 	    public List<String> findWords(char[][] board, String[] words) {
