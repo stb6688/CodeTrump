@@ -1,5 +1,10 @@
 package com.codetrump.leetcode.oj;
 
+/**
+ * 
+ * @author Alex
+ * @date Jul 4, 2017
+ */
 public abstract class AndroidUnlockPatterns {
 	public abstract int numberOfPatterns(int m, int n);
     public static void main(String[] args) {
