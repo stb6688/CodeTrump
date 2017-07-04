@@ -1,8 +1,5 @@
 package com.codetrump.leetcode.oj;
 
-import java.util.LinkedList;
-import java.util.List;
-
 public abstract class AndroidUnlockPatterns {
 	public abstract int numberOfPatterns(int m, int n);
     public static void main(String[] args) {
@@ -64,13 +61,13 @@ public abstract class AndroidUnlockPatterns {
         }
         
         private void move2(int r, int c, int[][] dirs1, int[][] dirs2, boolean[][] used, int len, int m, int n) {
-        	for (int[] dir1 : dirs1) {
-        		// used
-        		for (int[] dir2 : dirs2) {
-        			// used
-        			// dfs(r, c, dir1 + dir2)
-        		}
-        	}
+//        	for (int[] dir1 : dirs1) {
+//        		// used
+//        		for (int[] dir2 : dir1) {
+//        			// used
+//        			 dfs(r, c, dir1 + dir2)
+//        		}
+//        	}
         }
     }
 }
